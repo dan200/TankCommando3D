@@ -1,0 +1,64 @@
+﻿-- Entity data
+{
+	Components = {
+		Name = {},
+		Hierarchy = {},
+		Transform = {
+			Position = Property("Position"),
+			Rotation = Property("Rotation"),
+		},
+		Model = {
+			Model = "models/gun.obj",
+		},
+		Physics = {		
+			StartAwake = false,
+		},
+		ModelCollision = {
+			Model = "models/gun.obj",
+			CollisionGroup = "Prop",
+		},
+		Gun = {
+			Projectile = "entities/bullet.entity",
+			Spread = 2,
+			AutomaticFireRate = 8.0,
+			ManualFireRate = 10.0,
+			ClipSize = 24,
+			ProjectilesPerShot = 1,
+
+			Recoil = 1.0,
+			Kickback = 0.15,
+
+			FireWhenDroppedChance = 0.8,
+			FireWhenDroppedSpeedThreshold = 10.0,
+
+			NoiseRadius = 20.0,
+		},
+		Despawner = {		
+			Timeout = 10,
+			Animate = false,
+		},
+	},
+	Children = {
+		Barrel = {
+			Components = {
+				Name = {},
+				Hierarchy = {},
+				Transform = {
+					Position = Vector3(0.33, -0.28, 1.17),
+				},
+			},
+			Children = {
+				MuzzleFlash = {
+					Components = {
+						Name = {},
+						Hierarchy = {},
+						Transform = {},
+						Model = {
+							Model = "models/muzzleflash.obj",
+						},
+					},
+				},
+			},
+		},
+	},
+}

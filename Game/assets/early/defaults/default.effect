@@ -1,0 +1,5 @@
+-- Default effect (won't do much except not crash)
+{
+	VertexShader = "defaults/default.vert",
+	FragmentShader = "defaults/default.frag",	
+}

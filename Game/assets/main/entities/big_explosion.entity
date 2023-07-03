@@ -1,0 +1,19 @@
+﻿-- Entity data
+{
+	Components = {
+		Transform = {
+			Position = Property("Position"),
+			Rotation = Property("Rotation"),
+		},
+		Model = {
+			Model = "models/explosion.obj",
+		},
+		Explosion = {
+			StartRadius = 1.0,
+			EndRadius = 3.0,
+			Lifespan = 0.4,
+			Damage = 60,
+			PhysicsImpulse = 10.0,
+		},
+	},
+}

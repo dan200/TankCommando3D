@@ -1,0 +1,11 @@
+﻿-- Entity data
+{
+	Components = {
+		Name = {},
+		Transform = {
+			Position = Property("Position"),
+			Rotation = Property("Rotation"),
+		},
+		PlayerSpawnPoint = {},
+	},
+}

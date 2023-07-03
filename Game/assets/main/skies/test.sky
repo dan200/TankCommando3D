@@ -1,0 +1,5 @@
+﻿-- Sky data
+{
+	BackgroundColour = Colour(32, 32, 48),
+	AmbientColour = Colour(32, 32, 48),
+}

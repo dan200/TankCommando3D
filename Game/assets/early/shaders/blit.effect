@@ -1,0 +1,5 @@
+-- A simple effect used to copy 2D images to the screen
+{
+	VertexShader = "shaders/blit.vert",
+	FragmentShader = "shaders/blit.frag",
+}

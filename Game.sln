@@ -1,0 +1,116 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B380ED7D-CF43-49D4-99E8-9CF1EF283123}"
+	ProjectSection(SolutionItems) = preProject
+		Deploy.sh = Deploy.sh
+		Setup.sh = Setup.sh
+		SteamDeploy.sh = SteamDeploy.sh
+		SteamUpload.sh = SteamUpload.sh
+		UpdateLoc.sh = UpdateLoc.sh
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game", "Game\Game.csproj", "{98CA8686-FA26-49D2-A7F8-0DBB99122340}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|iPhone = Debug|iPhone
+		Debug|iPhoneSimulator = Debug|iPhoneSimulator
+		Debug|x86 = Debug|x86
+		DebugWindows|Any CPU = DebugWindows|Any CPU
+		DebugWindows|iPhone = DebugWindows|iPhone
+		DebugWindows|iPhoneSimulator = DebugWindows|iPhoneSimulator
+		DebugWindows|x86 = DebugWindows|x86
+		Release|Any CPU = Release|Any CPU
+		Release|iPhone = Release|iPhone
+		Release|iPhoneSimulator = Release|iPhoneSimulator
+		Release|x86 = Release|x86
+		ReleaseWindows|Any CPU = ReleaseWindows|Any CPU
+		ReleaseWindows|iPhone = ReleaseWindows|iPhone
+		ReleaseWindows|iPhoneSimulator = ReleaseWindows|iPhoneSimulator
+		ReleaseWindows|x86 = ReleaseWindows|x86
+		SteamDebug|Any CPU = SteamDebug|Any CPU
+		SteamDebug|iPhone = SteamDebug|iPhone
+		SteamDebug|iPhoneSimulator = SteamDebug|iPhoneSimulator
+		SteamDebug|x86 = SteamDebug|x86
+		SteamDebugWindows|Any CPU = SteamDebugWindows|Any CPU
+		SteamDebugWindows|iPhone = SteamDebugWindows|iPhone
+		SteamDebugWindows|iPhoneSimulator = SteamDebugWindows|iPhoneSimulator
+		SteamDebugWindows|x86 = SteamDebugWindows|x86
+		SteamRelease|Any CPU = SteamRelease|Any CPU
+		SteamRelease|iPhone = SteamRelease|iPhone
+		SteamRelease|iPhoneSimulator = SteamRelease|iPhoneSimulator
+		SteamRelease|x86 = SteamRelease|x86
+		SteamReleaseWindows|Any CPU = SteamReleaseWindows|Any CPU
+		SteamReleaseWindows|iPhone = SteamReleaseWindows|iPhone
+		SteamReleaseWindows|iPhoneSimulator = SteamReleaseWindows|iPhoneSimulator
+		SteamReleaseWindows|x86 = SteamReleaseWindows|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.Debug|Any CPU.Build.0 = Debug|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.Debug|Any CPU.Deploy.0 = Debug|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.Debug|iPhone.ActiveCfg = Debug|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.Debug|iPhoneSimulator.ActiveCfg = Debug|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.Debug|x86.ActiveCfg = Debug|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.Debug|x86.Build.0 = Debug|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.DebugWindows|Any CPU.ActiveCfg = DebugWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.DebugWindows|Any CPU.Build.0 = DebugWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.DebugWindows|iPhone.ActiveCfg = DebugWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.DebugWindows|iPhoneSimulator.ActiveCfg = DebugWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.DebugWindows|x86.ActiveCfg = DebugWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.DebugWindows|x86.Build.0 = DebugWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.Release|Any CPU.ActiveCfg = Release|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.Release|Any CPU.Build.0 = Release|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.Release|iPhone.ActiveCfg = Release|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.Release|iPhoneSimulator.ActiveCfg = Release|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.Release|x86.ActiveCfg = Release|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.Release|x86.Build.0 = Release|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.ReleaseWindows|Any CPU.ActiveCfg = ReleaseWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.ReleaseWindows|Any CPU.Build.0 = ReleaseWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.ReleaseWindows|iPhone.ActiveCfg = ReleaseWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.ReleaseWindows|iPhoneSimulator.ActiveCfg = ReleaseWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.ReleaseWindows|x86.ActiveCfg = ReleaseWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.ReleaseWindows|x86.Build.0 = ReleaseWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamDebug|Any CPU.ActiveCfg = SteamDebug|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamDebug|Any CPU.Build.0 = SteamDebug|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamDebug|iPhone.ActiveCfg = SteamDebug|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamDebug|iPhoneSimulator.ActiveCfg = SteamDebug|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamDebug|x86.ActiveCfg = SteamDebug|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamDebug|x86.Build.0 = SteamDebug|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamDebugWindows|Any CPU.ActiveCfg = SteamDebugWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamDebugWindows|Any CPU.Build.0 = SteamDebugWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamDebugWindows|iPhone.ActiveCfg = SteamDebugWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamDebugWindows|iPhoneSimulator.ActiveCfg = SteamDebugWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamDebugWindows|x86.ActiveCfg = SteamDebugWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamDebugWindows|x86.Build.0 = SteamDebugWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamRelease|Any CPU.ActiveCfg = SteamRelease|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamRelease|Any CPU.Build.0 = SteamRelease|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamRelease|iPhone.ActiveCfg = SteamRelease|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamRelease|iPhoneSimulator.ActiveCfg = SteamRelease|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamRelease|x86.ActiveCfg = SteamRelease|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamRelease|x86.Build.0 = SteamRelease|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamReleaseWindows|Any CPU.ActiveCfg = SteamReleaseWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamReleaseWindows|Any CPU.Build.0 = SteamReleaseWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamReleaseWindows|iPhone.ActiveCfg = SteamReleaseWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamReleaseWindows|iPhoneSimulator.ActiveCfg = SteamReleaseWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamReleaseWindows|x86.ActiveCfg = SteamReleaseWindows|x86
+		{98CA8686-FA26-49D2-A7F8-0DBB99122340}.SteamReleaseWindows|x86.Build.0 = SteamReleaseWindows|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {11CE578B-7AF8-4C03-85DA-DC1E8F79D97D}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.DotNetNamingPolicy = $1
+		$1.DirectoryNamespaceAssociation = PrefixedHierarchical
+		$1.ResourceNamePolicy = FileName
+		$0.TextStylePolicy = $7
+	EndGlobalSection
+EndGlobal

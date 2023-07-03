@@ -1,0 +1,21 @@
+﻿-- Entity data
+{
+	Components = {
+		Name = {},
+		Transform = {
+			Position = Property("Position"),
+			Rotation = Property("Rotation"),
+		},
+		Model = {
+			Model = "models/gun.obj",
+		},
+		WeaponSpawnPoint = {
+			EnableChance = 0.5,
+			Prefabs = {
+				"entities/gun.entity",
+				"entities/grenade.entity",
+			},
+			RespawnTimer = 30.0,
+		},
+	},
+}

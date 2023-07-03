@@ -1,0 +1,18 @@
+﻿-- Entity data
+{
+	Components = {
+		Name = {},
+		Transform = {
+			Position = Property("Position"),
+			Rotation = Property("Rotation"),
+		},
+		Physics = {
+			Static = true,
+		},
+		BoxCollision = {
+			Size = Property("Size"),
+			CollisionGroup = "PropTrigger",
+		},
+		Trigger = {},
+	},
+}

@@ -1,0 +1,5 @@
+-- Used to render maps
+{
+	VertexShader = "shaders/map.vert",
+	FragmentShader = "shaders/map.frag",
+}

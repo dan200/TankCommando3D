@@ -1,0 +1,14 @@
+﻿-- Entity data
+{
+	Components = {
+		Name = {},
+		Hierarchy = {},
+		Transform = {
+			Position = Property( "Position" ),
+			Rotation = Property( "Rotation" ),
+		},
+		Model = {
+			Model = "defaults/default.obj"
+		},
+	},
+}

@@ -1,0 +1,5 @@
+-- Used to render particles
+{
+	VertexShader = "shaders/particles.vert",
+	FragmentShader = "shaders/particles.frag",
+}

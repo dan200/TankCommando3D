@@ -1,0 +1,27 @@
+﻿-- Entity data
+{
+	Components = {
+		Name = {},
+		Hierarchy = {},
+		Transform = {
+			Position = Property("Position"),
+			Rotation = Property("Rotation"),
+		},
+		Model = {
+			Model = "models/grenade.obj",
+		},
+		Physics = {
+			StartAwake = false,
+		},
+		ModelCollision = {
+			Model = "models/grenade.obj",
+			CollisionGroup = "Prop",
+		},
+		Grenade = {
+			Timer = 4,
+		},
+	},
+	Children = {
+
+	}
+}

@@ -1,0 +1,22 @@
+//
+// worldspawn
+//
+
+@SolidClass = worldspawn : "worldspawn"
+[
+]
+
+//
+// Entities
+//
+
+@PointClass = PointTest : "PointTest"
+[
+	name(string) : "Name"
+]
+
+@SolidClass = SolidTest : "SolidTest"
+[
+	name(string) : "Name"
+	health(integer) : "Health"
+]

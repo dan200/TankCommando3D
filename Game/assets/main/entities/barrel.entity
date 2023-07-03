@@ -1,0 +1,26 @@
+﻿-- Entity data
+{
+	Components = {
+		Name = {},
+		Transform = {
+			Position = Property("Position"),
+			Rotation = Property("Rotation"),
+		},
+		Model = {
+			Model = "models/cone.obj",
+		},
+		Physics = {},
+		ModelCollision = {
+			Model = "models/cone.obj",
+			CollisionGroup = "Prop",
+		},
+		Health = {
+			MaxHealth = 25,
+		},
+		Breakable = {},
+		Despawner = {
+			Timeout = 2,
+			Animate = true,		
+		},
+	},
+}

@@ -1,0 +1,91 @@
+// en translations
+meta.fallback_language=debug
+meta.english_language_name=English
+meta.native_language_name=English
+meta.translator_name=Daniel Ratcliffe
+meta.translator_email=dratcliffe@gmail.com
+test.hello_world=Hello World!
+
+ai.chatter.lost_sight_of_enemy.0=Lost sight of the target.
+ai.chatter.lost_sight_of_enemy.1=Can no longer locate the target.
+ai.chatter.lost_sight_of_enemy.2=Lost visual on the target.
+ai.chatter.lost_sight_of_enemy.3=Did anyone see where they went?
+ai.chatter.lost_sight_of_enemy.4=Can't find the target.
+ai.chatter.forgotten_enemy.0=No sign of the target. Returning to patrol.
+ai.chatter.forgotten_enemy.1=Looks like they're gone. Going back to patrol.
+ai.chatter.forgotten_enemy.2=Can't find the enemy. Stay on the lookout.
+ai.chatter.forgotten_enemy.3=The enemy seems to have retreated. Stay vigilant.
+ai.chatter.heard_something.0=I hear something. Heading to investigate.
+ai.chatter.heard_something.1=What was that? I'm checking it out.
+ai.chatter.heard_something.2=Did you hear that? Cover me while I take a look.
+ai.chatter.heard_something.3=Is someone there? Identify yourself!
+ai.chatter.gained_sight_of_enemy.0=Target is in my sights.
+ai.chatter.gained_sight_of_enemy.1=Possible visual on the target.
+ai.chatter.gained_sight_of_enemy.2=I can see the enemy!
+ai.chatter.gained_sight_of_enemy.3=I think I see them!
+ai.chatter.enemy_spotted.0=Enemy spotted!
+ai.chatter.enemy_spotted.1=Enemy straight ahead!
+ai.chatter.enemy_spotted.2=Enemy at 12 o' clock!
+ai.chatter.enemy_spotted.3=The enemy is right there!
+ai.chatter.under_attack.0=I'm under attack!
+ai.chatter.under_attack.1=Contact!
+ai.chatter.under_attack.2=Enemy is firing on my position!
+ai.chatter.under_attack.3=They're firing at us!
+ai.chatter.under_attack.4=I'm hit!
+ai.chatter.under_attack.5=Hostile fire!
+ai.chatter.enemy_killed.0=Target neutralised.
+ai.chatter.enemy_killed.1=Tango down.
+ai.chatter.enemy_killed.2=Enemy is no longer a threat.
+ai.chatter.enemy_killed.3=They're dead.
+ai.chatter.enemy_killed.4=We got 'em.
+ai.chatter.enemy_killed.5=Remember when I said I'd kill you last? I lied.
+ai.chatter.die.0=Arghh!!
+ai.chatter.die.1=*screams*
+ai.chatter.die.2=Mein Gott!
+ai.chatter.die.3=*wilhelm scream*
+ai.chatter.die.4=ARGH!
+ai.chatter.die.5=NOOOOO!
+ai.chatter.die.6=UGH!
+
+gameover.tanks_killed.0=No Tanks destroyed
+gameover.tanks_killed.1=1 Tank destroyed
+gameover.tanks_killed={0} Tanks destroyed
+gameover.press_restart=Press FIRE to try again
+
+ai.namegen.first.0=Orange
+ai.namegen.first.1=Red
+ai.namegen.first.2=Green
+ai.namegen.first.3=Blue
+ai.namegen.first.4=Gold
+ai.namegen.first.5=Black
+ai.namegen.first.6=Pink
+
+ai.namegen.second.0=Seven
+ai.namegen.second.1=Leader
+ai.namegen.second.2=Two
+ai.namegen.second.3=Three
+ai.namegen.second.4=Four
+ai.namegen.second.5=Five
+ai.namegen.second.6=Six
+
+controls.line1=TANK COMMANDO 3D - CONTROLS
+controls.line2.1=WSAD
+controls.line2.2=Move
+controls.line3.1=Mouse
+controls.line3.2=Look
+controls.line4.1=E
+controls.line4.2=Pick up weapons
+controls.line5.1=Left Click
+controls.line5.2=Fire weapon
+controls.line6.1=Right Click
+controls.line6.2=Throw weapon
+controls.line7.1=Control
+controls.line7.2=Crouch
+controls.line8.1=Space
+controls.line8.2=Jump
+controls.line9.1=Shift
+controls.line9.2=Sprint
+controls.line10=Press FIRE to begin
+controls.line11=Press THROW to quit
+
+

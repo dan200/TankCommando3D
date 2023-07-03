@@ -1,0 +1,5 @@
+-- Used to render simple textured geometry
+{
+	VertexShader = "shaders/textured.vert",
+	FragmentShader = "shaders/textured.frag",
+}

@@ -1,0 +1,5 @@
+-- Used to render flat shaded geometry
+{
+	VertexShader = "shaders/flat.vert",
+	FragmentShader = "shaders/flat.frag",
+}

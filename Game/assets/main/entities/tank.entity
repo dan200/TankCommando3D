@@ -1,0 +1,142 @@
+﻿-- Entity data
+{
+	Components = {
+		Name = {},
+		Hierarchy = {},
+		Transform = {
+			Position = Property("Position"),
+			Rotation = Property("Rotation"),
+		},
+		Model = {
+			Model = "models/tank_base.obj",
+		},
+		Navigator = {},
+		TankMover = {
+			Speed = 1.5,
+			TurnRate = 30,
+		},
+		Sight = {
+			Range = 50,
+			FOVX = 100,
+			FOVY = 40,
+			EyeTransformPath = "./Turret/Eye",
+		},
+		TankBehaviour = {
+			ForgetTargetTime = 30,
+			TurretPath = "./Turret",
+			PatrolRoutePath = Property("PatrolRoutePath");
+		},
+		Physics = {
+			Kinematic = true,
+		},
+		ModelCollision = {
+			Model = "models/tank_base.obj",
+			CollisionGroup = "NPC",
+		},
+		Health = {
+			MaxHealth = 200,
+		},
+		Despawner = {
+			Timeout = 5,
+			Animate = true,
+		},
+		CharacterName = {
+			Parts = {
+				"ai.namegen.first",
+				"ai.namegen.second",
+			},
+		},
+	},
+	Children = {
+		Trackable = {
+			Components = {
+				Name = {},
+				Hierarchy = {},
+				Transform = {
+					Position = Vector3(0,1,0),
+				},
+				Trackable = {
+					IconTransformPath = "../TrackableIcon",
+					HealthPath = "..",
+				},
+			},
+		},
+		TrackableIcon = {
+			Components = {
+				Name = {},
+				Hierarchy = {},
+				Transform = {
+					Position = Vector3(0,2.5,0),
+				},
+			},
+		},
+		Turret = {
+			Components = {
+				Name = {},
+				Hierarchy = {},
+				Transform = {},
+				Model = {
+					Model = "models/tank_turret.obj",
+				},
+				TankGunner = {
+					TurnRate = 60,
+					GunPath = ".",
+				},
+				Gun = {
+					Projectile = "entities/shell.entity",
+					Spread = 4,
+					AutomaticFireRate = 8,
+					ManualFireRate = 8,
+					ClipSize = 1000,
+					ProjectilesPerShot = 1,
+				},
+				Physics = {
+				},
+				ModelCollision = {
+					Model = "models/tank_turret.obj",
+					CollisionGroup = "NPC",
+				},
+				Despawner = {
+					Timeout = 5,
+					Animate = true,
+				},
+				Health = {				
+					IsProxy = true,
+					ProxyRedirectPath = "..",
+				},
+			},
+			Children = {
+				Barrel = {
+					Components = {
+						Name = {},
+						Hierarchy = {},
+						Transform = {
+							Position = Vector3(0.2, 1.56, 2.75),
+						},
+					},
+					Children = {
+						MuzzleFlash = {
+							Components = {
+								Name = {},
+								Hierarchy = {},
+								Transform = {},
+								Model = {
+									Model = "models/tankmuzzleflash.obj",
+								},
+							},
+						},
+					},
+				},
+				Eye = {
+					Components = {
+						Name = {},
+						Hierarchy = {},
+						Transform = {
+							Position = Vector3(0, 1, -1),
+						},
+					},
+				},
+			},
+		},
+	},
+}

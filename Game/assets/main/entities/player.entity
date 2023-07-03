@@ -1,0 +1,51 @@
+﻿-- Entity data
+{
+	Components = {
+		Hierarchy = {},
+		Transform = {
+			Position = Property("Position"),
+			Rotation = Property("Rotation"),
+		},
+		Input = {},
+		PlayerCamera = {},
+		PlayerHUD = {},
+		PlayerInput = {},
+		PlayerSettings = {},
+		PlayerMovement = {
+			Radius = 0.35,
+			Height = 1.83,
+			CrouchedHeight = 1.0,
+			GroundClearance = 0.25,
+			EyeHeight = 1.77,
+
+			RunSpeed = 5.2,
+			WalkSpeed = 3.2,
+			Acceleration = 20,
+			Decceleration = 50,
+			AirAcceleration = 8,
+
+			CrouchedSpeed = 1.8,
+			CrouchTransitionTime = 0.3,
+
+			GravityScale = 1.25,
+			JumpHeight = 0.6,
+			NumDoubleJumps = 0,
+			FallDamageThreshold = 10.0,
+			FallDamageScale = 15,
+		},
+		PlayerInteraction = {
+			InteractDistance = 6,		
+		},
+		PlayerWeaponHolder = {
+			ThrowChargeTime = 0.75,
+		},
+		PlayerTracker = {
+			ConfirmTime = 1.2,
+		},
+		PlayerStats = {},
+		SightTarget = {},
+		Health = {
+			MaxHealth = 100,
+		},
+	},
+}

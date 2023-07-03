@@ -1,0 +1,5 @@
+-- Used to post-process the 3D scene after rendering
+{
+	VertexShader = "shaders/post.vert",
+	FragmentShader = "shaders/post.frag",
+}

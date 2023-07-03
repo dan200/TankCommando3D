@@ -1,0 +1,6 @@
+﻿-- Level data
+{
+	Sky = "defaults/default.sky",
+	Title = "ERROR",
+	Entities = {},
+}

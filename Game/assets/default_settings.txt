@@ -1,0 +1,80 @@
+-- Game Settings
+{
+    ["Audio.Volume.Sound"] = 0.440678,
+    ["Audio.Volume.Music"] = 0.7,
+    ["Video.Fullscreen"] = true,
+    ["Video.FullscreenWidth"] = 0,
+    ["Video.FullscreenHeight"] = 0,
+    ["Video.EnableShadows"] = true,
+    ["Video.AntiAliasingMode"] = "None",
+    ["Video.VSync"] = true,
+    ["Video.Gamma"] = 1,
+    ["Video.WindowWidth"] = 1280,
+    ["Video.WindowHeight"] = 720,
+    ["Video.WindowMaximised"] = false,
+    ["Input.EnableGamepad"] = true,
+    ["Input.EnableGamepadRumble"] = true,
+    ["Input.MouseSensitivity"] = 5.8,
+    ["Input.InvertMouseY"] = false,
+    ["Input.Mappings"] = {
+        Pause = {
+            "Keyboard.Escape",
+            "Gamepad.Start",
+            "Gamepad.Back",
+        },
+        Jump = {
+            "Keyboard.Space",
+            "Gamepad.A",
+        },
+        MoveForward = {
+            "Keyboard.W",
+            "Gamepad.LeftStickUp",
+        },
+        MoveBack = {
+            "Keyboard.S",
+            "Gamepad.LeftStickDown",
+        },
+        StrafeLeft = {
+            "Keyboard.A",
+            "Gamepad.LeftStickLeft",
+        },
+        StrafeRight = {
+            "Keyboard.D",
+            "Gamepad.LeftStickRight",
+        },
+        Run = {
+            "Keyboard.LeftShift",
+            "Gamepad.LeftStick",
+        },
+        Interact = {
+            "Keyboard.E",
+            "Gamepad.X",
+        },
+        Fire = {
+            "Mouse.Left",
+            "Gamepad.RightTrigger",
+        },
+        Throw = {
+            "Mouse.Right",
+            "Gamepad.LeftTrigger",
+        },
+        Crouch = {
+            "Keyboard.LeftCtrl",
+            "Gamepad.LeftBumper",
+        },
+        LookLeft = {
+            "Gamepad.RightStickLeft",
+        },
+        LookRight = {
+            "Gamepad.RightStickRight",
+        },
+        LookUp = {
+            "Gamepad.RightStickUp",
+        },
+        LookDown = {
+            "Gamepad.RightStickDown",
+        },
+    },
+    ["Text.Language"] = "system",
+    ["Game.FOV"] = 70,
+}

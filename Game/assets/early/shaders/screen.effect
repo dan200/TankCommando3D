@@ -1,0 +1,5 @@
+-- Used to render the GUI
+{
+	VertexShader = "shaders/screen.vert",
+	FragmentShader = "shaders/screen.frag",
+}

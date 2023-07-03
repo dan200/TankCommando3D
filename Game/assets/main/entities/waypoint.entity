@@ -1,0 +1,10 @@
+﻿-- Entity data
+{
+	Components = {
+		Name = {},
+		Transform = {
+			Position = Property("Position"),
+		},
+		NavigationWaypoint = {},
+	},
+}

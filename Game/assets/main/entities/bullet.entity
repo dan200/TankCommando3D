@@ -1,0 +1,20 @@
+﻿-- Entity data
+{
+	Components = {
+		Hierarchy = {},
+		Transform = {
+			Position = Property("Position"),
+			Rotation = Property("Rotation"),
+		},
+		Model = {
+			Model = "models/bullet.obj",
+		},
+		Projectile = {
+			Speed = 100,
+			GravityScale = 0,
+			Damage = 7,
+			ImpactPrefab = "entities/explosion.entity",
+			LifeSpan = 5,
+		},
+	},
+}

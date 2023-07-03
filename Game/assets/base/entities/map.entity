@@ -1,0 +1,23 @@
+﻿-- Entity data
+{
+	Components = {
+		Name = {},
+		Transform = {
+			Position = Property( "Position" ),
+			Rotation = Property( "Rotation" ),
+		},
+		Map = {
+			Map = Property( "Map" ),
+			MapEntityIndex = 0,
+		},
+		Physics = {
+			Static = true,
+		},
+		MapCollision = {
+			Map = Property( "Map" ),
+			MapEntityIndex = 0,
+			CollisionGroup = "Environment",
+			BoundingBoxesOnly = true,
+		},
+	},
+}

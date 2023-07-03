@@ -1,0 +1,21 @@
+﻿-- Entity data
+{
+	Components = {
+		Name = {},
+		Transform = {
+			Position = Property( "Position" ),
+			Rotation = Property( "Rotation" ),
+		},
+		Model = {
+			Model = Property( "Model" ),
+		},
+		Physics = {
+			Mass = Property( "Mass" ),
+			Material = "physics/metal.physicsMaterial",
+		},
+		ModelCollision = {
+			Model = Property( "Model" ),
+			CollisionGroup = "Prop",
+		},
+	},
+}

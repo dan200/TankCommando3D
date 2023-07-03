@@ -1,0 +1,14 @@
+﻿-- Entity data
+{
+	Components = {
+		Name = {},
+		Transform = {
+			Position = Vector3( 0.0, 1.0, 0.0 ),
+			Rotation = Property( "Rotation" ),
+		},
+		DirectionalLight = {
+			Colour = Property( "Colour" ),
+			CastShadows = true,
+		},
+	},
+}

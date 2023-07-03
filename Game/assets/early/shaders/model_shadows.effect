@@ -1,0 +1,5 @@
+-- Used to generate shadow volumes
+{
+	VertexShader = "shaders/model_shadows.vert",
+	FragmentShader = "shaders/shadows.frag",
+}
