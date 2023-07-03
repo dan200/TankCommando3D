@@ -1,5 +1,6 @@
 ﻿using Dan200.Core.Math;
 using Dan200.Core.Main;
+using Dan200.Core.Assets;
 
 namespace Dan200.Core.Input
 {
@@ -86,6 +87,10 @@ namespace Dan200.Core.Input
             m_previousValue = m_value;
             m_value = value;
         }
+
+        public string TranslatePrompt(Language language)
+        {
+            return language.Translate(m_prompt);
+        }
     }
 }
-

@@ -40,7 +40,7 @@ namespace Dan200.Core.Animation
         {
             if (s_animMachine == null)
             {
-                s_animMachine = new LuaMachine(null, App.PlatformID.IsDesktop());
+                s_animMachine = new LuaMachine(null, App.Platform.IsDesktop());
                 s_animMachine.AllowByteCodeLoading = true;
                 s_animMachine.RemoveUnsafeGlobals();
 

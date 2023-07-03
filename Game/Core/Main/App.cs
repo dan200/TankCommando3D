@@ -80,14 +80,6 @@ namespace Dan200.Core.Main
 			set;
 		} = null;
 
-		public static Platform.PlatformID PlatformID
-        {
-            get
-			{
-				return Platform.PlatformID;
-			}
-        }
-
 		public static string SavePath
 		{
 			get;
@@ -331,7 +323,7 @@ namespace Dan200.Core.Main
         
         public static void Init(GameInfo gameInfo, ProgramArguments arguments)
         {
-			App.Assert(Platform != null);
+			App.Assert(App.Platform != null, "App.Init called twice");
 
 			// Start logging
 			App.OnLog += OnConsoleLog;
@@ -361,8 +353,8 @@ namespace Dan200.Core.Main
             {
 				App.Log("Command Line Arguments: {0}", App.Arguments.ToString());
             }
-            App.Log("Developed by {0}", App.Info.DeveloperName);
-            App.Log("Platform: {0}", App.PlatformID);
+            App.Log("Developed by {0}", App.Info.Author);
+            App.Log("Platform: {0}", App.Platform.Type);
 
             // Init ODE
             ODE.ODE.dInitODE();

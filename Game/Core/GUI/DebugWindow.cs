@@ -4,10 +4,17 @@ using Dan200.Core.Assets;
 using Dan200.Core.Input;
 using Dan200.Core.Main;
 using Dan200.Core.Math;
+using Dan200.Core.Platform;
 using Dan200.Core.Render;
 
 namespace Dan200.Core.GUI
 {
+    internal static class DebugGUI
+    {
+        public static float DEBUG_GUI_EXPECTED_SCREEN_HEIGHT = 1080.0f;
+        public static float DEBUG_GUI_SCALE = (float)Game.Game.Game.TARGET_SCREEN_HEIGHT / DEBUG_GUI_EXPECTED_SCREEN_HEIGHT;
+    }
+
     internal struct DebugGUITheme
     {
         public static DebugGUITheme Default
@@ -16,15 +23,15 @@ namespace Dan200.Core.GUI
             {
                 var theme = new DebugGUITheme();
                 theme.Font = Font.Get("fonts/Arial64.fnt");
-                theme.FontSize = 16;
+                theme.FontSize = (int)(16.0f * DebugGUI.DEBUG_GUI_SCALE);
                 theme.BackgroundColour = new Colour(228, 229, 233);
                 theme.HighlightColour = new Colour(177, 205, 237);
                 theme.HoverColour = new Colour(119, 173, 238);
                 theme.TextColour = Colour.Black;
                 theme.BoxColour = Colour.White;
-                theme.Margin = 6.0f;
-                theme.Spacing = 4.0f;
-                theme.Indent = 6.0f;
+                theme.Margin = 6.0f * DebugGUI.DEBUG_GUI_SCALE;
+                theme.Spacing = 4.0f * DebugGUI.DEBUG_GUI_SCALE;
+                theme.Indent = 6.0f * DebugGUI.DEBUG_GUI_SCALE;
                 return theme;
             }
         }
@@ -482,7 +489,7 @@ namespace Dan200.Core.GUI
                     float xPos = GetCursorPosition(text, m_state.TextSelectionStart);
                     var width = Theme.Font.Measure("|", Theme.FontSize, false).X;
                     DrawText(
-                        textPos + new Vector2(Theme.Spacing + xPos - 50.0f, Theme.Spacing),
+                        textPos + new Vector2(Theme.Spacing + xPos - 50.0f, Theme.Spacing), // TODO UNHARDCODE
                         new Vector2(100.0f, textHeight),
                         "|",
                         TextAlignment.Center,
@@ -619,7 +626,7 @@ namespace Dan200.Core.GUI
 
                     if (keyboard.GetInput(Key.C).Pressed)
                     {
-                        if ((App.PlatformID == Platform.PlatformID.MacOS) ?
+                        if ((App.Platform.Type == PlatformType.MacOS) ?
                             (keyboard.GetInput(Key.LeftGUI).Held || keyboard.GetInput(Key.RightGUI).Held) :
                             (keyboard.GetInput(Key.LeftCtrl).Held || keyboard.GetInput(Key.RightCtrl).Held))
                         {
@@ -710,7 +717,7 @@ namespace Dan200.Core.GUI
             return false;
         }
 
-        public bool FloatSlider(string label, ref float io_number, float min, float max, string format="N2")
+        public bool FloatSlider(string label, ref float io_number, float min, float max, float rounding=0.0f, string format="N2")
         {
             App.Assert(max >= min);
             bool changed = false;
@@ -725,9 +732,6 @@ namespace Dan200.Core.GUI
                 m_position.Y
             );
 
-            var fraction = (max > min) ?
-                Mathf.Saturate((io_number - min) / (max - min)) :
-                0.0f;
             var mouse = m_screen.InputDevices.Mouse;
             if (mouse != null)
             {
@@ -742,9 +746,17 @@ namespace Dan200.Core.GUI
                 {
                     if(mouse.GetInput(MouseButton.Left).Held)
                     {
-                        fraction = Mathf.Saturate((m_screen.MousePosition.X - sliderPosition.X) / size.X);
-                        io_number = min + (max - min) * fraction;
-                        changed = true;
+                        var mouseFraction = Mathf.Saturate((m_screen.MousePosition.X - sliderPosition.X) / size.X);
+                        var newNumber = min + (max - min) * mouseFraction;
+                        if(rounding != 0.0f)
+                        {
+                            newNumber = Mathf.Round(newNumber, rounding);
+                        }
+                        if(newNumber != io_number)
+                        {
+                            io_number = newNumber;
+                            changed = true;
+                        }
                     }
                     else
                     {
@@ -758,6 +770,7 @@ namespace Dan200.Core.GUI
             var oldClip = m_builder.ClipRegion;
             try
             {
+                var fraction = (max > min) ? Mathf.Saturate((io_number - min) / (max - min)) : 0.0f;
                 m_builder.ClipRegion = new Quad(sliderPosition, size.X * fraction, size.Y);
                 DrawBox(sliderPosition, size, Theme.HighlightColour);
             }
@@ -775,7 +788,7 @@ namespace Dan200.Core.GUI
         public bool IntSlider(string label, ref int io_number, int min, int max)
         {
             float floatNumber = (float)io_number;
-            if(FloatSlider(label, ref floatNumber, (float)min, (float)max, "N0"))
+            if(FloatSlider(label, ref floatNumber, (float)min, (float)max, 1.0f, "N0"))
             {
                 io_number = (int)floatNumber;
                 return true;
@@ -870,8 +883,8 @@ namespace Dan200.Core.GUI
         private void DrawBox(Vector2 start, Vector2 size, Colour colour)
         {
             var texture = Texture.Get("debuggui/box.png", false);
-            float xEdgeWidth = (float)texture.Width * 0.25f;
-            float yEdgeWidth = (float)texture.Height * 0.25f;
+            float xEdgeWidth = (float)texture.Width * 0.25f * DebugGUI.DEBUG_GUI_SCALE;
+            float yEdgeWidth = (float)texture.Height * 0.25f * DebugGUI.DEBUG_GUI_SCALE;
             m_builder.AddNineSlice(
                 start,
                 start + size,
@@ -925,7 +938,7 @@ namespace Dan200.Core.GUI
 
         protected DebugWindow()
         {
-            Size = new Vector2(256.0f, 256.0f);
+            Size = new Vector2(256.0f, 256.0f) * DebugGUI.DEBUG_GUI_SCALE;
             m_title = "";
             m_theme = DebugGUITheme.Default;
             m_state = new DebugGUIState();
@@ -956,7 +969,7 @@ namespace Dan200.Core.GUI
             var titleHeight = m_theme.Font.GetHeight(m_theme.FontSize) + 2.0f * m_theme.Spacing;
             var titleSize = new Vector2(Width, titleHeight);
             var corner = Texture.Get("debuggui/corner.png", false);
-            var cornerSize = new Vector2(corner.Width, corner.Height);
+            var cornerSize = new Vector2(corner.Width, corner.Height) * DebugGUI.DEBUG_GUI_SCALE;
 
             if (m_drag == null)
             {
@@ -1022,17 +1035,17 @@ namespace Dan200.Core.GUI
                 builder.AddNineSlice(
                     position,
                     position + Size,
-                    box.Width * 0.25f,
-                    box.Height * 0.25f,
-                    box.Width * 0.25f,
-                    box.Height * 0.25f,
+                    box.Width * 0.25f * DebugGUI.DEBUG_GUI_SCALE,
+                    box.Height * 0.25f * DebugGUI.DEBUG_GUI_SCALE,
+                    box.Width * 0.25f * DebugGUI.DEBUG_GUI_SCALE,
+                    box.Height * 0.25f * DebugGUI.DEBUG_GUI_SCALE,
                     box,
                     m_theme.BackgroundColour
                 );
 
                 // Corner
                 var corner = Texture.Get("debuggui/corner.png", false);
-                var cornerSize = new Vector2(corner.Width, corner.Height);
+                var cornerSize = new Vector2(corner.Width, corner.Height) * DebugGUI.DEBUG_GUI_SCALE;
                 corner.Wrap = false;
                 builder.AddQuad(
                     position + Size - cornerSize,
@@ -1051,10 +1064,10 @@ namespace Dan200.Core.GUI
                 builder.AddNineSlice(
                     position,
                     position + titleSize,
-                    box.Width * 0.25f,
-                    box.Height * 0.25f,
-                    box.Width * 0.25f,
-                    box.Height * 0.25f,
+                    box.Width * 0.25f * DebugGUI.DEBUG_GUI_SCALE,
+                    box.Height * 0.25f * DebugGUI.DEBUG_GUI_SCALE,
+                    box.Width * 0.25f * DebugGUI.DEBUG_GUI_SCALE,
+                    box.Height * 0.25f * DebugGUI.DEBUG_GUI_SCALE,
                     box,
                     m_theme.HighlightColour
                 );

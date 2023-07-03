@@ -53,12 +53,12 @@ namespace Dan200.Game.User
                     }
 
 					// Read the settings
-					foreach (var statistic in App.Info.Statistics)
+					foreach (var statistic in Statistics.ALL_STATISTICS)
                     {
 						int oldValue = m_statistics.ContainsKey(statistic) ? m_statistics[statistic] : 0;
 						m_statistics[statistic] = table.GetOptionalInt("Statistics." + statistic.ID, oldValue);
                     }
-					foreach (var achievement in App.Info.Achievements)
+					foreach (var achievement in Achievements.ALL_ACHIEVEMENTS)
                     {
                         if (table.GetOptionalBool("Achievements." + achievement.ID, false))
                         {
@@ -71,7 +71,7 @@ namespace Dan200.Game.User
                     {
                         var statistic = pair.Key;
                         var value = pair.Value;
-                        statistic.UnlockLinkedAchievements(value, value, UnlockAchievement, null);
+                        statistic.UpdateLinkedAchievements(value, value, UnlockAchievement, null);
                         if (m_network.SupportsStatistics)
                         {
                             m_network.LocalUser.SetStatistic(statistic, value);
@@ -131,11 +131,11 @@ namespace Dan200.Game.User
             }
         }
 
-        public void IndicateAchievementProgress(Achievement achievement, int currentValue, int unlockValue)
+        public void UpdateAchievementProgress(Achievement achievement, int currentValue, int unlockValue, bool notify)
         {
             if (m_network.SupportsAchievements)
             {
-                m_network.LocalUser.IndicateAchievementProgress(achievement, currentValue, unlockValue);
+                m_network.LocalUser.UpdateAchievementProgress(achievement, currentValue, unlockValue, notify);
             }
         }
 
@@ -167,7 +167,7 @@ namespace Dan200.Game.User
 
         public void RemoveAllAchievements()
         {
-			foreach (var achievement in App.Info.Achievements)
+			foreach (var achievement in Achievements.ALL_ACHIEVEMENTS)
             {
                 RemoveAchievement(achievement);
             }
@@ -191,7 +191,7 @@ namespace Dan200.Game.User
             {
 				m_network.LocalUser.SetStatistic(stat, value);
             }
-			stat.UnlockLinkedAchievements(oldValue, value, UnlockAchievement, IndicateAchievementProgress);
+			stat.UpdateLinkedAchievements(oldValue, value, UnlockAchievement, UpdateAchievementProgress);
         }
 
         public int GetStatistic(Statistic stat)
@@ -201,7 +201,7 @@ namespace Dan200.Game.User
 
         public void ResetAllStatistics()
         {
-			foreach (var statistic in App.Info.Statistics)
+			foreach (var statistic in Statistics.ALL_STATISTICS)
             {
                 SetStatistic(statistic, 0);
             }

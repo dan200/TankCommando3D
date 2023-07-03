@@ -1,6 +1,7 @@
 ﻿using System;
 using Dan200.Core.Input;
 using Dan200.Core.Main;
+using Dan200.Core.Math;
 using Dan200.Core.Render;
 using Dan200.Core.Util;
 
@@ -45,7 +46,15 @@ namespace Dan200.Core.Window.Headless
 			}
 		}
 
-		public bool Closed
+        public Vector2I Size
+        {
+            get
+            {
+                return new Vector2I(m_width, m_height);
+            }
+        }
+
+        public bool Closed
 		{
 			get
 			{

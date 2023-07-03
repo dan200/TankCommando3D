@@ -5,10 +5,9 @@ namespace Dan200.Core.GUI
 {
 	internal class TouchPress : ISpatialPress
     {
-        private Screen m_screen;
+        private IScreen m_screen;
         private Touch m_touch;
-        private IAreaHolder m_areaHolder;
-        private int m_subArea;
+        private IAreaProvider m_areaProvider;
 
         public bool Pressed
         {
@@ -32,10 +31,10 @@ namespace Dan200.Core.GUI
             {
                 if (m_touch.Released)
                 {
-					if (m_areaHolder != null)
+					if (m_areaProvider != null)
 					{
-						var quad = m_areaHolder.GetSubArea(m_subArea);
-						return quad.Contains(m_screen.WindowToScreen(m_touch.LatestPosition));
+                        var area = m_areaProvider.Area;
+						return area.Contains(m_screen.WindowToScreen(m_touch.LatestPosition));
 					}
 					else
 					{
@@ -43,14 +42,6 @@ namespace Dan200.Core.GUI
 					}
                 }
                 return false;
-            }
-        }
-
-        public int SubArea
-        {
-            get
-            {
-                return m_subArea;
             }
         }
 
@@ -62,12 +53,11 @@ namespace Dan200.Core.GUI
             }
         }
 
-        public TouchPress(Screen screen, Touch touch, IAreaHolder areaHolder = null, int subArea = 0)
+        public TouchPress(IScreen screen, Touch touch, IAreaProvider areaProvider=null)
         {
             m_screen = screen;
             m_touch = touch;
-            m_areaHolder = areaHolder;
-            m_subArea = subArea;
+            m_areaProvider = areaProvider;
         }
     }
 }

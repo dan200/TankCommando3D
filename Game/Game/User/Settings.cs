@@ -35,7 +35,8 @@ namespace Dan200.Game.User
         // Input
         public bool EnableGamepad;
         public bool EnableGamepadRumble;
-		public float MouseSensitivity;
+        public bool EnableMouseLook;
+        public float MouseSensitivity;
         public bool InvertMouseY;
         public readonly Dictionary<string, InputOrigin[]> InputMappings;
 
@@ -62,7 +63,7 @@ namespace Dan200.Game.User
 			}
 
 			// Video
-			if (App.PlatformID.IsMobile())
+			if (App.Platform.IsMobile())
             {
                 Fullscreen = true;
                 FullscreenWidth = 0;
@@ -89,7 +90,8 @@ namespace Dan200.Game.User
 			// Input
             EnableGamepad = true;
             EnableGamepadRumble = true;
-			MouseSensitivity = 3.0f;
+            EnableMouseLook = true;
+            MouseSensitivity = 3.0f;
             InvertMouseY = false;
             InputMappings.Clear(); // TODO: Populate
 
@@ -177,7 +179,9 @@ namespace Dan200.Game.User
 					// Input
 					EnableGamepad = table.GetOptionalBool("Input.EnableGamepad", EnableGamepad);
 					EnableGamepadRumble = table.GetOptionalBool("Input.EnableGamepadRumble", EnableGamepadRumble);
-					MouseSensitivity = table.GetOptionalFloat("Input.MouseSensitivity", MouseSensitivity);
+                    EnableMouseLook = table.GetOptionalBool("Input.EnableMouseLook", EnableMouseLook);
+                    MouseSensitivity = table.GetOptionalFloat("Input.MouseSensitivity", MouseSensitivity);
+                    InvertMouseY = table.GetOptionalBool("Input.InvertMouseY", InvertMouseY);
 
                     InputMappings.Clear();
                     var mappingsTable = table.GetOptionalTable("Input.Mappings", LuaTable.Empty);
@@ -246,7 +250,8 @@ namespace Dan200.Game.User
 			// Input
 			table["Input.EnableGamepad"] = EnableGamepad;
 			table["Input.EnableGamepadRumble"] = EnableGamepadRumble;
-			table["Input.MouseSensitivity"] = MouseSensitivity;
+            table["Input.MouseLook"] = EnableMouseLook;
+            table["Input.MouseSensitivity"] = MouseSensitivity;
             table["Input.InvertMouseY"] = InvertMouseY;
 
             var mappingsTable = new LuaTable(InputMappings.Count);

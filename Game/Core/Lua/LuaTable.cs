@@ -12,14 +12,6 @@ namespace Dan200.Core.Lua
         private Dictionary<LuaValue, LuaValue> m_values;
         private int m_arrayLength;
 
-        public Dictionary<LuaValue, LuaValue>.KeyCollection Keys
-        {
-            get
-            {
-                return m_values.Keys;
-            }
-        }
-
         public int Count
         {
             get

@@ -10,6 +10,8 @@ using Dan200.Core.Util;
 using System.Collections.Generic;
 using System.Linq;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Physics;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Systems;
 using System;
 using Dan200.Core.Script;
@@ -85,12 +87,12 @@ namespace Dan200.Core.Components.Physics
         public Vector3 InitialAngularVelocity;
     }
 
-    [RequireSystem(typeof(PhysicsSystem))]
+    [RequireComponentOnAncestor(typeof(PhysicsWorldComponent))]
     [RequireComponent(typeof(TransformComponent))]
 	[AfterComponent(typeof(HierarchyComponent))]
     internal class PhysicsComponent : EditableComponent<PhysicsComponentData>, IUpdate, IPhysicsUpdate, IHierarchyListener
     {
-        private PhysicsSystem m_physics;
+        private PhysicsWorldComponent m_world;
         private TransformComponent m_transform;
 
         private PhysicsObject m_object;
@@ -115,14 +117,14 @@ namespace Dan200.Core.Components.Physics
 
         protected override void OnInit(in PhysicsComponentData properties)
         {
-            m_physics = Level.GetSystem<PhysicsSystem>();
+            m_world = Entity.GetComponentOnAncestor<PhysicsWorldComponent>();
             m_transform = Entity.GetComponent<TransformComponent>();
 
             var materialPath = properties.Material;
             var material = (materialPath != null) ? PhysicsMaterial.Get(materialPath) : PhysicsMaterial.Default;
 
             bool isStatic = properties.Static || Level.InEditor;
-            m_object = isStatic ? m_physics.World.CreateStaticObject(material) : m_physics.World.CreateObject(material);
+            m_object = isStatic ? m_world.World.CreateStaticObject(material) : m_world.World.CreateObject(material);
             m_object.Kinematic = properties.Kinematic;
             m_object.Transform = m_transform.Transform;
             m_object.Mass = properties.Mass;
@@ -148,7 +150,7 @@ namespace Dan200.Core.Components.Physics
 			}
         }
 
-        protected override void ReInit(in PhysicsComponentData properties)
+        protected override void Reset(in PhysicsComponentData properties)
         {
             App.Assert(Level.InEditor);
             App.Assert(m_object.Static);
@@ -233,7 +235,7 @@ namespace Dan200.Core.Components.Physics
                 m_transform.LocalTransform = Matrix4.Lerp(
                     m_lastStepTransform, 
                     m_object.Transform, 
-                    m_physics.World.CurrentStepFraction
+                    m_world.World.CurrentStepFraction
                 );
                 m_transform.LocalVelocity = m_object.Velocity;
                 m_transform.LocalAngularVelocity = m_object.AngularVelocity;
@@ -258,14 +260,6 @@ namespace Dan200.Core.Components.Physics
 		public void OnParentChanged(Entity oldParent, Entity newParent)
 		{
 			UpdateIsRoot(newParent);
-		}
-
-		public void OnChildAdded(Entity child)
-		{
-		}
-
-		public void OnChildRemoved(Entity child)
-		{
 		}
 
         private PhysicsComponent FindRootPhysicsComponent(Entity entity)

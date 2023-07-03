@@ -47,34 +47,36 @@ namespace Dan200.Core.Network
 			m_linkedAchievements.Add(link);
 		}
 
-		public void UnlockLinkedAchievements(int oldValue, int newValue, Action<Achievement> unlockCallback, Action<Achievement, int, int> progressCallback)
+		public void UpdateLinkedAchievements(int oldValue, int newValue, Action<Achievement> unlockCallback, Action<Achievement, int, int, bool> updateProgressCallback)
 		{
 			if (m_linkedAchievements != null)
 			{
 				foreach(var link in m_linkedAchievements)
 				{
-					if (newValue >= link.UnlockValue)
-					{
-						if (unlockCallback != null)
-						{
+                    if (unlockCallback != null)
+                    {
+                        if (newValue >= link.UnlockValue)
+    					{
 							unlockCallback.Invoke(link.Achievement);
 						}
 					}
-					else if(link.NotifyValues != null)
+					if (updateProgressCallback != null)
 					{
-						if (progressCallback != null)
-						{
-							for (int i = link.NotifyValues.Length - 1; i >= 0; --i)
-							{
-								var notifyValue = link.NotifyValues[i];
-								if (oldValue < notifyValue && newValue >= notifyValue)
-								{
-									progressCallback.Invoke(link.Achievement, newValue, link.UnlockValue);
-									break;
-								}
-							}
-						}
-					}
+                        bool notify = false;
+                        if (link.NotifyValues != null)
+                        {
+                            for (int i = link.NotifyValues.Length - 1; i >= 0; --i)
+                            {
+                                var notifyValue = link.NotifyValues[i];
+                                if (oldValue < notifyValue && newValue >= notifyValue)
+                                {
+                                    notify = true;
+                                    break;
+                                }
+                            }
+                        }
+                        updateProgressCallback.Invoke(link.Achievement, newValue, link.UnlockValue, notify);
+                    }
 				}
 			}
 		}

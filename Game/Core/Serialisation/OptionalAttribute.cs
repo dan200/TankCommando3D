@@ -14,6 +14,11 @@ namespace Dan200.Core.Serialisation
             Default = null;
         }
 
+        public OptionalAttribute(float x, float y)
+        {
+            Default = new Vector2(x, y);
+        }
+
         public OptionalAttribute(float x, float y, float z)
         {
             Default = new Vector3(x, y, z);

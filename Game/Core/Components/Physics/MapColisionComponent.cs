@@ -40,11 +40,11 @@ namespace Dan200.Core.Components.Physics
             Assets.Assets.OnAssetsReloaded += OnAssetsReloaded;
         }
 
-        protected override void ReInit(in MapCollisionComponentData properties)
+        protected override void Reset(in MapCollisionComponentData properties)
         {
             m_map = Map.Get(properties.Map);
             m_properties = properties;
-            base.ReInit(properties);
+            base.Reset(properties);
         }
 
         protected override void OnShutdown()

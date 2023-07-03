@@ -10,6 +10,7 @@ using Dan200.Core.Multiplayer;
 using Dan200.Core.Lua;
 using Dan200.Core.Components;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Components.Core;
 
 namespace Dan200.Core.Level
@@ -176,7 +177,7 @@ namespace Dan200.Core.Level
 			App.Assert(m_entitiesByID.ContainsKey(entity.ID));
 
 			var hierarchy = includeChildren ? entity.GetComponent<HierarchyComponent>() : null;
-			if (hierarchy != null && hierarchy.Children.Count > 0)
+			if (hierarchy != null && hierarchy.HasChildren)
 			{
 				// Destroy the entity and its children
 				var allEntities = new List<Entity>();
@@ -266,7 +267,7 @@ namespace Dan200.Core.Level
                         {
                             entitiesWithComponent.Add(component.Entity);
                         }
-                        foreach (var component in m_components.GetNonLiveComponents(componentID))
+                        foreach (var component in m_components.GetNewComponents(componentID))
                         {
                             entitiesWithComponent.Add(component.Entity);
                         }

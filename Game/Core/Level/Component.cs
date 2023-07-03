@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Dan200.Core.Interfaces;
 using Dan200.Core.Lua;
 using Dan200.Core.Main;
 using Dan200.Core.Math;
@@ -21,16 +20,5 @@ namespace Dan200.Core.Level
         }
 
         protected abstract void OnInit(in TComponentData properties);
-    }
-
-    internal abstract class EditableComponent<TComponentData> : Component<TComponentData>, IEditable
-        where TComponentData : struct
-    {
-        public void ReInit(LuaTable properties)
-        {
-            ReInit(LONSerialiser.Parse<TComponentData>(properties));
-        }
-
-        protected abstract void ReInit(in TComponentData properties);
     }
 }

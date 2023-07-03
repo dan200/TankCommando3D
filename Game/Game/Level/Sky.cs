@@ -28,12 +28,6 @@ namespace Dan200.Game.Level
             set;
         }
 
-        public string BackgroundImage
-        {
-            get;
-            set;
-        }
-
         public ColourF AmbientColour
         {
             get;
@@ -44,16 +38,14 @@ namespace Dan200.Game.Level
         {
             public Colour BackgroundColour;
             public Colour AmbientColour;
-
-            [Optional]
-            public string BackgroundImage;
         }
 
         public static object LoadData(Stream stream, string path)
         {
             var decoder = new LONDecoder(stream);
-            decoder.AddMacro("Colour", LONMacros.Colour);
+            decoder.AddMacro("Vector2", LONMacros.Vector2);
             decoder.AddMacro("Vector3", LONMacros.Vector3);
+            decoder.AddMacro("Colour", LONMacros.Colour);
             var table = decoder.DecodeValue().GetTable();
             return LONSerialiser.Parse<SkyData>(table);
         }
@@ -79,7 +71,6 @@ namespace Dan200.Game.Level
         {
             var skyData = (SkyData)data;
             BackgroundColour = skyData.BackgroundColour.ToColourF();
-            BackgroundImage = skyData.BackgroundImage;
             AmbientColour = skyData.AmbientColour.ToColourF();
         }
 

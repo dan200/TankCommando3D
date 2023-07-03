@@ -557,12 +557,12 @@ namespace Dan200.Core.Network.Steamworks
             }
         }
 
-		public void IndicateLocalUserAchievementProgress(Achievement achievement, int currentValue, int unlockValue)
+		public void UpdateLocalUserAchievementProgress(Achievement achievement, int currentValue, int unlockValue, bool notify)
         {
 			App.Assert(App.Info.Achievements.Contains(achievement));
 			App.Assert(currentValue >= 0);
 			App.Assert(unlockValue >= currentValue);
-            if (m_initialised)
+            if (m_initialised && notify)
             {
 				if (!m_achievements.Contains(achievement))
                 {

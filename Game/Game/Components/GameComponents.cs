@@ -14,6 +14,7 @@ namespace Dan200.Game.Components
         {
             // AI
             ComponentRegistry.RegisterComponent<CharacterNameComponent, CharacterNameComponentData>("CharacterName");
+            ComponentRegistry.RegisterComponent<NavGraphComponent, NavGraphComponentData>("NavGraph");
             ComponentRegistry.RegisterComponent<NavigationWaypointComponent, NavigationWaypointComponentData>("NavigationWaypoint");
             ComponentRegistry.RegisterComponent<NavigatorComponent, NavigatorComponentData>("Navigator");
             ComponentRegistry.RegisterComponent<PatrolRouteComponent, PatrolRouteComponentData>("PatrolRoute");
@@ -25,8 +26,8 @@ namespace Dan200.Game.Components
             ComponentRegistry.RegisterComponent<TankSpawnPointComponent, TankSpawnPointComponentData>("TankSpawnPoint");
 
             // Editor
-            ComponentRegistry.RegisterComponent<EditorComponent, EditorComponentData>("__Editor");
-            ComponentRegistry.RegisterComponent<ManipulatorComponent, ManipulatorComponentData>("__Manipulator");
+            ComponentRegistry.RegisterComponent<EditorComponent, EditorComponentData>("_Editor");
+            ComponentRegistry.RegisterComponent<TransformManipulatorComponent, TransformManipulatorComponentData>("_TransformManipulator");
 
             // Player
             ComponentRegistry.RegisterComponent<PlayerCameraComponent, PlayerCameraComponentData>("PlayerCamera");
@@ -42,12 +43,14 @@ namespace Dan200.Game.Components
             ComponentRegistry.RegisterComponent<TrackableComponent, TrackableComponentData>("Trackable");
 
             // Weapons
+            ComponentRegistry.RegisterComponent<AmmoComponent, AmmoComponentData>("Ammo");
             ComponentRegistry.RegisterComponent<ExplosionComponent, ExplosionComponentData>("Explosion");
             ComponentRegistry.RegisterComponent<GunComponent, GunComponentData>("Gun");
             ComponentRegistry.RegisterComponent<GrenadeComponent, GrenadeComponentData>("Grenade");
             ComponentRegistry.RegisterComponent<HealthComponent, HealthComponentData>("Health");
             ComponentRegistry.RegisterComponent<ProjectileComponent, ProjectileComponentData>("Projectile");
             ComponentRegistry.RegisterComponent<BreakableComponent, BreakableComponentData>("Breakable");
+            ComponentRegistry.RegisterComponent<WeaponComponent, WeaponComponentData>("Weapon");
             ComponentRegistry.RegisterComponent<WeaponSpawnPointComponent, WeaponSpawnPointComponentData>("WeaponSpawnPoint");
 
             // Misc

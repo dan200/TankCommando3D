@@ -1,6 +1,7 @@
 ﻿using Dan200.Core.Components.Core;
 using Dan200.Core.Components.Physics;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Level;
 using Dan200.Core.Lua;
 using Dan200.Core.Main;
@@ -10,6 +11,7 @@ using Dan200.Core.Systems;
 using Dan200.Core.Util;
 using Dan200.Game.Components.Misc;
 using Dan200.Game.Components.Weapons;
+using Dan200.Game.Interfaces;
 using Dan200.Game.Systems.AI;
 using System;
 using System.Collections.Generic;
@@ -26,9 +28,9 @@ namespace Dan200.Game.Components.AI
         public string PatrolRoutePath;
     }
 
-    [RequireSystem(typeof(NavigationSystem))]
     [RequireSystem(typeof(NoiseSystem))]
     [RequireSystem(typeof(ChatterSystem))]
+    [RequireComponentOnAncestor(typeof(NavGraphComponent))]
     [RequireComponent(typeof(SightComponent))]
     [RequireComponent(typeof(NavigatorComponent))]
     [RequireComponent(typeof(HealthComponent))]
@@ -40,9 +42,9 @@ namespace Dan200.Game.Components.AI
     internal class TankBehaviourComponent : Component<TankBehaviourComponentData>, IUpdate, IDebugDraw
     {
         private NameSystem m_nameSystem;
-        private NavigationSystem m_navigation;
         private NoiseSystem m_noise;
         private ChatterSystem m_chatterSystem;
+        private NavGraphComponent m_navigation;
         private SightComponent m_sight;
         private TransformComponent m_transform;
         private NavigatorComponent m_navigator;
@@ -68,9 +70,9 @@ namespace Dan200.Game.Components.AI
         protected override void OnInit(in TankBehaviourComponentData properties)
         {
             m_nameSystem = Level.GetSystem<NameSystem>();
-            m_navigation = Level.GetSystem<NavigationSystem>();
             m_noise = Level.GetSystem<NoiseSystem>();
             m_chatterSystem = Level.GetSystem<ChatterSystem>();
+            m_navigation = Entity.GetComponentOnAncestor<NavGraphComponent>();
             m_transform = Entity.GetComponent<TransformComponent>();
             m_sight = Entity.GetComponent<SightComponent>();
             m_navigator = Entity.GetComponent<NavigatorComponent>();
@@ -241,8 +243,11 @@ namespace Dan200.Game.Components.AI
         private void PlotRouteToLastKnownTargetPosition()
         {
             var target = m_navigation.FindWaypointNear(m_lastKnownTargetPosition);
-            m_navigator.ClearRoute();
-            m_navigator.AppendRoute(target);
+            if (m_navigator.DestinationWaypoint != target)
+            {
+                m_navigator.ClearRoute();
+                m_navigator.AppendRoute(target);
+            }
         }
 
         private void Explode(in Damage lastDamage)
@@ -252,7 +257,7 @@ namespace Dan200.Game.Components.AI
             var gunHierarchy = gun.GetComponent<HierarchyComponent>();
             if (gunHierarchy != null)
             {
-                gunHierarchy.Parent = null;
+                gunHierarchy.Parent = Level.Entities.Lookup(1); // TODO
             }
             var gunPhysics = gun.GetComponent<PhysicsComponent>();
             if(gunPhysics != null)
@@ -277,13 +282,12 @@ namespace Dan200.Game.Components.AI
             properties["Radius"] = 6.0f;
             properties["Lifespan"] = 0.1f;
             properties["Damage"] = 100.0f;
-            var explosion = prefab.Instantiate(Level, properties);
+            var explosion = prefab.Instantiate(Level, properties, 1); // TODO
 
-            // Propogate damage origin
-            var explosionComponent = explosion.GetComponent<ExplosionComponent>();
-            if (explosionComponent != null)
+            // Propagate damage origin
+            foreach (var propagator in explosion.GetComponentsWithInterface<IDamagePropagator>())
             {
-                explosionComponent.DamageOrigin = lastDamage.Origin;
+                propagator.DamageOrigin = lastDamage.Origin;
             }
 
             // Despawn soom

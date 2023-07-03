@@ -11,7 +11,6 @@ namespace Dan200.Game.Systems
             // AI
             ComponentRegistry.RegisterSystem<ChatterSystem>("Chatter");
             ComponentRegistry.RegisterSystem<NoiseSystem>("Noise");
-            ComponentRegistry.RegisterSystem<NavigationSystem>("Navigation");
         }
     }
 }

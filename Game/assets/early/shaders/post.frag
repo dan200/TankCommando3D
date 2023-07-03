@@ -14,10 +14,10 @@ void main(void)
 	vec3 texColour = texture( inputTexture, texCoord ).rgb;
 
 	// Apply wireframe
-	float threshold = 0.01;
-	bool n = distance(texColour, texture( inputTexture, texCoord + vec2(0.0, p.y) ).rgb) < threshold;
-	bool e =  distance(texColour, texture( inputTexture, texCoord + vec2(-p.x, 0.0) ).rgb) < threshold;
-	bool ne = distance(texColour, texture( inputTexture, texCoord + vec2(-p.x, p.y) ).rgb) < threshold;
+	float threshold = 1.0f / 128.0f;
+	bool n = distance(texColour, texture( inputTexture, texCoord + vec2(0.0, p.y) ).rgb) <= threshold;
+	bool e =  distance(texColour, texture( inputTexture, texCoord + vec2(-p.x, 0.0) ).rgb) <= threshold;
+	bool ne = distance(texColour, texture( inputTexture, texCoord + vec2(-p.x, p.y) ).rgb) <= threshold;
 
 	vec3 finalColour;
 	vec3 whiteColour = vec3(0.3, 1.0, 0.5);

@@ -37,14 +37,14 @@ namespace Dan200.Core.Multiplayer
 
         public void Open()
         {
-            App.Assert(!IsOpen);
+            CheckClosed();
             m_open = true;
             m_tcpListener.Start();
         }
 
         public void Close()
         {
-            App.Assert(IsOpen);
+            CheckOpen();
             m_tcpListener.Stop();
             m_open = false;
         }
@@ -63,7 +63,7 @@ namespace Dan200.Core.Multiplayer
 
         public bool Accept(out RemoteConnection o_connection)
         {
-            App.Assert(IsOpen);
+            CheckOpen();
             try
             {
                 // See if a new client has connected
@@ -88,18 +88,12 @@ namespace Dan200.Core.Multiplayer
 
         private void CheckOpen()
         {
-            if (!m_open)
-            {
-                throw new IOException("Listener not open");
-            }
+            App.Assert(m_open);
         }
 
         private void CheckClosed()
         {
-            if (m_open)
-            {
-                throw new IOException("Listener already open");
-            }
+            App.Assert(!m_open);
         }
     }
 }

@@ -1,10 +1,13 @@
 ﻿using Dan200.Core.Components.Core;
 using Dan200.Core.Components.Physics;
+using Dan200.Core.Geometry;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Level;
 using Dan200.Core.Lua;
 using Dan200.Core.Main;
 using Dan200.Core.Math;
+using Dan200.Core.Physics;
 using Dan200.Core.Serialisation;
 using Dan200.Core.Systems;
 using Dan200.Core.Util;
@@ -19,8 +22,20 @@ using System.Threading.Tasks;
 
 namespace Dan200.Game.Components.Weapons
 {
+    internal enum TriggerMechanism
+    {
+        Timer,
+        Proximity,
+    }
+
     internal struct GrenadeComponentData
     {
+        [Optional(Default = TriggerMechanism.Timer)]
+        public TriggerMechanism TriggerMechanism;
+
+        [Optional(Default = 1.0f)]
+        public float Range;
+
         [Range(Min = 0.0)]
         public float Timer;
     }
@@ -28,13 +43,16 @@ namespace Dan200.Game.Components.Weapons
     [RequireSystem(typeof(NameSystem))]
     [RequireComponent(typeof(PhysicsComponent))]
     [RequireComponent(typeof(TransformComponent))]
-    [AfterComponent(typeof(PhysicsComponent))]
-    internal class GrenadeComponent : Component<GrenadeComponentData>, IInteractable, IUpdate
+    [RequireComponent(typeof(WeaponComponent))]
+    [AfterComponent(typeof(HealthComponent))]
+    internal class GrenadeComponent : Component<GrenadeComponentData>, IUpdate, IDamagePropagator
     {
         private PhysicsComponent m_physics;
         private TransformComponent m_transform;
+        private HealthComponent m_health;
         private GrenadeComponentData m_properties;
 
+        private bool m_armed;
         private float m_fuseTimer;
        
         public Entity DamageOrigin
@@ -55,58 +73,79 @@ namespace Dan200.Game.Components.Weapons
         {
             m_physics = Entity.GetComponent<PhysicsComponent>();
             m_transform = Entity.GetComponent<TransformComponent>();
+            m_health = Entity.GetComponent<HealthComponent>();
             m_properties = properties;
 
+            m_armed = false;
             m_fuseTimer = -1.0f;
-        }
-        
-        protected override void OnShutdown()
-        {
+
+            if (m_health != null)
+            {
+                m_health.Invulnerable = true;
+                m_health.OnDeath += OnDeath;
+            }
         }
 
-        public void LightFuse()
+        protected override void OnShutdown()
         {
-            if(m_fuseTimer < 0.0f)
+            if(m_health != null)
+            {
+                m_health.OnDeath -= OnDeath;
+            }
+        }
+
+        private void OnDeath(HealthComponent sender, DamageEventArgs args)
+        {
+            if(m_armed)
+            {
+                Explode();
+            }
+        }
+
+        public void Arm()
+        {
+            m_armed = true;
+            if (m_properties.TriggerMechanism == TriggerMechanism.Timer)
             {
                 m_fuseTimer = m_properties.Timer;
             }
-        }
-        
-        public bool CanInteract(Entity player, Interaction interaction)
-        {
-            if (interaction == Interaction.UseOnce)
+            if (m_health != null)
             {
-                var playerWeapon = player.GetComponent<PlayerWeaponHolderComponent>();
-                if (playerWeapon != null)
-                {
-                    return true;
-                }
+                m_health.Invulnerable = false;
             }
-            return false;
-        }
-
-        public bool Interact(Entity player, Interaction interaction)
-        {
-            if(CanInteract(player, interaction))
-            {
-                player.GetComponent<PlayerWeaponHolderComponent>().TakeWeapon(Entity);
-                return true;
-            }
-            return false;
         }
 
         public void Update(float dt)
         {
-            // Update fuze
-            if(m_fuseTimer >= 0.0f)
+            if (m_armed)
             {
-                m_fuseTimer -= dt;
-                if(m_fuseTimer < dt)
+                // Check for proximity
+                if (m_properties.TriggerMechanism == TriggerMechanism.Proximity && m_fuseTimer < 0.0f)
                 {
-                    Explode();
-                    Level.Entities.Destroy(Entity);
+                    var sphere = new Sphere(m_transform.Position, m_properties.Range);
+                    var contacts = new List<Contact>();
+                    var numContacts = m_physics.Object.World.SphereTest(sphere, CollisionGroup.NPC | CollisionGroup.Player, contacts);
+                    foreach(var contact in contacts)
+                    {
+                        var entity = contact.Shape.UserData as Entity;
+                        if(entity != DamageOrigin)
+                        {
+                            m_fuseTimer = m_properties.Timer;
+                            break;
+                        }
+                    }
                 }
-            }            
+
+                // Countdown the fuse
+                if (m_fuseTimer >= 0.0f)
+                {
+                    m_fuseTimer -= dt;
+                    if (m_fuseTimer < dt)
+                    {
+                        Explode();
+                    }
+                }
+            }
         }
 
         private void Explode()
@@ -123,14 +162,16 @@ namespace Dan200.Game.Components.Weapons
             properties["Radius"] = 8.0f;
             properties["Lifespan"] = 0.2f;
             properties["Damage"] = 100.0f;
-            var explosion = prefab.Instantiate(Level, properties);
+            var explosion = prefab.Instantiate(Level, properties, 1); // TODO
 
             // Propogate damage origin
-            var explosionComponent = explosion.GetComponent<ExplosionComponent>();
-            if (explosionComponent != null)
+            foreach(var propagator in explosion.GetComponentsWithInterface<IDamagePropagator>())
             {
-                explosionComponent.DamageOrigin = DamageOrigin;
+                propagator.DamageOrigin = DamageOrigin;
             }
+
+            // Die
+            Level.Entities.Destroy(Entity);
         }
     }
 }

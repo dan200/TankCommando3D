@@ -1,7 +1,9 @@
 ﻿using Dan200.Core.GUI;
+using Dan200.Core.Input;
 using Dan200.Core.Main;
 using Dan200.Core.Math;
 using Dan200.Core.Render;
+using Dan200.Game.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +14,14 @@ namespace Dan200.Game.GUI
 {
     internal class ControlsDisplay : Element
     {
-        public ControlsDisplay()
+        private Settings m_settings;
+        private InputMapper m_mapper;
+        private DeviceCategory m_displayedDeviceCategory;
+
+        public ControlsDisplay(Settings settings, InputMapper mapper)
         {
+            m_settings = settings;
+            m_mapper = mapper;
         }
 
         protected override void OnInit()
@@ -22,6 +30,20 @@ namespace Dan200.Game.GUI
 
         protected override void OnUpdate(float dt)
         {
+            if(m_mapper.LastUsedDeviceCategory != m_displayedDeviceCategory)
+            {
+                RequestRebuild();
+            }
+        }
+
+        private void AddInput(GUIBuilder builder, ref Vector2 io_pos, string prompt, string description)
+        {
+            var font = LowResUI.TextFont;
+            var fontSize = LowResUI.TextFontSize;
+            var fontHeight = font.GetHeight(fontSize);
+            builder.AddText(prompt, io_pos - new Vector2(5.0f, 0.0f), font, fontSize, Colour.White, TextAlignment.Right);
+            builder.AddText(Screen.Language.Translate(description), io_pos + new Vector2(5.0f, 0.0f), font, fontSize, Colour.White, TextAlignment.Left);
+            io_pos.Y += fontHeight;
         }
 
         protected override void OnRebuild(GUIBuilder builder)
@@ -40,22 +62,43 @@ namespace Dan200.Game.GUI
                 position.Y + 0.5f * size.Y - 0.5f * numLines * fontHeight
             );
 
-            builder.AddText(Screen.Language.Translate("controls.line1"), pos, font, fontSize, Colour.White, TextAlignment.Center);
+            builder.AddText(Screen.Language.Translate("controls.title"), pos, font, fontSize, Colour.White, TextAlignment.Center);
             pos.Y += 2.0f * fontHeight;
 
-            for(int i=2; i<=9; ++i)
+            AddInput(builder, ref pos, m_mapper.GetAxisPair(
+                "MoveForward", "MoveBack", "StrafeLeft", "StrafeRight"
+            ).TranslatePrompt(Screen.Language), "controls.move");
+
+            string lookPrompt;
+            if((m_mapper.LastUsedDeviceCategory == DeviceCategory.Mouse ||
+                m_mapper.LastUsedDeviceCategory == DeviceCategory.Keyboard) &&
+                m_settings.EnableMouseLook)
             {
-                builder.AddText(Screen.Language.Translate("controls.line" + i + ".1"), pos - new Vector2(16.0f, 0.0f), font, fontSize, Colour.White, TextAlignment.Right);
-                builder.AddText(Screen.Language.Translate("controls.line" + i + ".2"), pos + new Vector2(16.0f, 0.0f), font, fontSize, Colour.White, TextAlignment.Left);
-                pos.Y += fontHeight;
+                lookPrompt = Screen.Language.Translate("Inputs.Mouse.Cursor");
             }
+            else
+            {
+                lookPrompt = m_mapper.GetAxisPair(
+                    "LookUp", "LookDown", "LookLeft", "LookRight"
+                ).TranslatePrompt(Screen.Language);
+            }
+            AddInput(builder, ref pos, lookPrompt, "controls.look");
+
+            AddInput(builder, ref pos, m_mapper.GetInput("Interact").TranslatePrompt(Screen.Language), "controls.interact");
+            AddInput(builder, ref pos, m_mapper.GetInput("Fire").TranslatePrompt(Screen.Language), "controls.fire");
+            AddInput(builder, ref pos, m_mapper.GetInput("Throw").TranslatePrompt(Screen.Language), "controls.throw");
+            AddInput(builder, ref pos, m_mapper.GetInput("Crouch").TranslatePrompt(Screen.Language), "controls.crouch");
+            AddInput(builder, ref pos, m_mapper.GetInput("Jump").TranslatePrompt(Screen.Language), "controls.jump");
+            AddInput(builder, ref pos, m_mapper.GetInput("Run").TranslatePrompt(Screen.Language), "controls.run");
             pos.Y += fontHeight;
 
-            builder.AddText(Screen.Language.Translate("controls.line10"), pos, font, fontSize, Colour.White, TextAlignment.Center);
+            builder.AddText(Screen.Language.Translate("controls.press_to_begin"), pos, font, fontSize, Colour.White, TextAlignment.Center);
             pos.Y += fontHeight;
 
-            builder.AddText(Screen.Language.Translate("controls.line11"), pos, font, fontSize, Colour.White, TextAlignment.Center);
+            builder.AddText(Screen.Language.Translate("controls.press_to_quit"), pos, font, fontSize, Colour.White, TextAlignment.Center);
             pos.Y += fontHeight;
+
+            m_displayedDeviceCategory = m_mapper.LastUsedDeviceCategory;
         }
     }
 }

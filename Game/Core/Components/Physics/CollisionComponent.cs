@@ -10,19 +10,20 @@ using Dan200.Core.Util;
 using System.Collections.Generic;
 using System.Linq;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Systems;
 using System;
 using Dan200.Core.Components.Core;
 
 namespace Dan200.Core.Components.Physics
 {
-	[RequireSystem(typeof(PhysicsSystem))]
+	[RequireComponentOnAncestor(typeof(PhysicsWorldComponent))]
 	[RequireComponent(typeof(TransformComponent))]
 	[AfterComponent(typeof(HierarchyComponent))]
 	[AfterComponent(typeof(PhysicsComponent))]
     internal abstract class CollisionComponent<TComponentData> : EditableComponent<TComponentData>, IAncestryListener, IComponentListener where TComponentData : struct
     {
-		private PhysicsWorld m_world;
+		private PhysicsWorldComponent m_world;
 		private TransformComponent m_transform;
 		private PhysicsComponent m_physics;
 		private Matrix4 m_fromPhysicsTransform;
@@ -63,14 +64,14 @@ namespace Dan200.Core.Components.Physics
 
         protected override void OnInit(in TComponentData properties)
         {
-			m_world = Level.GetSystem<PhysicsSystem>().World;
+			m_world = Entity.GetComponentOnAncestor<PhysicsWorldComponent>();
 			m_transform = Entity.GetComponent<TransformComponent>();
 			m_physics = FindRootPhysicsComponent(null, out m_fromPhysicsTransform);
 			m_shapes = new List<PhysicsShape>();
 			RebuildShapes();
         }
 
-        protected override void ReInit(in TComponentData properties)
+        protected override void Reset(in TComponentData properties)
         {
             RebuildShapes();
         }
@@ -188,7 +189,7 @@ namespace Dan200.Core.Components.Physics
 			m_shapes.Clear();
 
 			// Create the new shapes
-			CreateShapes(m_world, m_shapes);
+			CreateShapes(m_world.World, m_shapes);
 			foreach (var shape in m_shapes)
 			{
 				shape.Transform = m_fromPhysicsTransform.ToWorld(shape.Transform);

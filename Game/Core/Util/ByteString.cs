@@ -228,6 +228,18 @@ namespace Dan200.Core.Util
 			Length = length;
         }
 
+        public Stream OpenForRead()
+        {
+            if(Array != null)
+            {
+                return new MemoryStream(Array, (int)Offset, Length, false);
+            }
+            else
+            {
+                return new UnmanagedMemoryStream((byte*)Offset, Length);
+            }
+        }
+
 		public Bytes Lock()
 		{
 			if (Array != null)

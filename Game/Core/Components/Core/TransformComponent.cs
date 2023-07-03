@@ -1,6 +1,8 @@
 using System;
 using Dan200.Core.Animation;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
+using Dan200.Core.Interfaces.Multiplayer;
 using Dan200.Core.Level;
 using Dan200.Core.Lua;
 using Dan200.Core.Math;
@@ -8,6 +10,8 @@ using Dan200.Core.Render;
 using Dan200.Core.Main;
 using Dan200.Core.Util;
 using Dan200.Core.Serialisation;
+using Dan200.Game.Components.Editor;
+using Dan200.Core.Multiplayer;
 
 namespace Dan200.Core.Components.Core
 {
@@ -21,7 +25,7 @@ namespace Dan200.Core.Components.Core
     }
 
 	[AfterComponent(typeof(HierarchyComponent))]
-    internal class TransformComponent : EditableComponent<TransformComponentData>, IDebugDraw, IHierarchyListener
+    internal class TransformComponent : EditableComponent<TransformComponentData>, IDebugDraw, IHierarchyListener, IReplicatable
     {
 		private TransformComponent m_parent;
 
@@ -198,10 +202,10 @@ namespace Dan200.Core.Components.Core
             {
                 m_parent = parent.GetComponent<TransformComponent>();
             }
-            ReInit(properties);
+            Reset(properties);
         }
 
-        protected override void ReInit(in TransformComponentData properties)
+        protected override void Reset(in TransformComponentData properties)
         {
             LocalTransform = Matrix4.CreateTranslationScaleRotation(
                 properties.Position,
@@ -210,8 +214,44 @@ namespace Dan200.Core.Components.Core
             );
         }
 
+        public override void AddManipulators(EditorComponent editor)
+        {
+            string positionProperty = null;
+            string rotationProperty = null;
+            foreach(var property in editor.Prefab.Properties)
+            {
+                var propertyName = property.Key;
+                if(propertyName == "Position") // TODO: Match on field names, not property names!
+                {
+                    positionProperty = propertyName;
+                }
+                if (propertyName == "Rotation") // TODO: Match on field names, not property names!
+                {
+                    rotationProperty = propertyName;
+                }
+            }
+            if (positionProperty != null || rotationProperty != null)
+            {
+                var manipulator = Entity.AddComponent<TransformManipulatorComponent>(LuaTable.Empty);
+                manipulator.PositionProperty = positionProperty;
+                manipulator.RotationProperty = rotationProperty;
+            }
+        }
+
+        public override void RemoveManipulators(EditorComponent editor)
+        {
+            Entity.RemoveComponent<TransformManipulatorComponent>();
+        }
+
         protected override void OnShutdown()
         {
+        }
+
+        public void Replicate(IReplicator replicator)
+        {
+            replicator.Replicate(ref LocalTransform);
+            replicator.Replicate(ref LocalVelocity);
+            replicator.Replicate(ref LocalAngularVelocity);
         }
 
 		public void OnParentChanged(Entity oldParent, Entity newParent)
@@ -224,14 +264,6 @@ namespace Dan200.Core.Components.Core
 			{
 				m_parent = null;
 			}
-		}
-
-		public void OnChildAdded(Entity child)
-		{
-		}
-
-		public void OnChildRemoved(Entity child)
-		{
 		}
 
         public void DebugDraw()

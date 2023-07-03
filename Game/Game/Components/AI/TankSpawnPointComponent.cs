@@ -1,7 +1,9 @@
 ﻿using Dan200.Core.Components;
 using Dan200.Core.Components.Core;
+using Dan200.Core.Components.Physics;
 using Dan200.Core.Geometry;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Level;
 using Dan200.Core.Lua;
 using Dan200.Core.Main;
@@ -24,13 +26,13 @@ namespace Dan200.Game.Components.Player
         public float RespawnTime;
     }
 
-    [RequireSystem(typeof(PhysicsSystem))]
+    [RequireComponentOnAncestor(typeof(PhysicsWorldComponent))]
     [RequireComponent(typeof(TransformComponent))]
     [RequireComponent(typeof(PatrolRouteComponent))]
     [RequireComponent(typeof(NameComponent))]
     internal class TankSpawnPointComponent : Component<TankSpawnPointComponentData>, IUpdate
     {
-        private PhysicsSystem m_physics;
+        private PhysicsWorldComponent m_physics;
         private NameComponent m_name;
         private TransformComponent m_transform;
         private TankSpawnPointComponentData m_properties;
@@ -49,7 +51,8 @@ namespace Dan200.Game.Components.Player
         protected override void OnInit(in TankSpawnPointComponentData properties)
         {
             Entity.Visible = Level.InEditor;
-            m_physics = Level.GetSystem<PhysicsSystem>();
+
+            m_physics = Entity.GetComponentOnAncestor<PhysicsWorldComponent>();
             m_name = Entity.GetComponent<NameComponent>();
             m_transform = Entity.GetComponent<TransformComponent>();
             m_properties = properties;
@@ -119,8 +122,8 @@ namespace Dan200.Game.Components.Player
             var properties = new LuaTable();
             properties["Position"] = m_transform.Position.ToLuaValue();
             properties["Rotation"] = (m_transform.Transform.GetRotationAngles() * Mathf.RADIANS_TO_DEGREES).ToLuaValue();
-            properties["PatrolRoutePath"] = '/' + m_name.Name;
-            m_tank = prefab.Instantiate(Level, properties);
+            properties["PatrolRoutePath"] = "../" + m_name.Name;
+            m_tank = prefab.Instantiate(Level, properties, 1); // TODO
         }
     }
 }

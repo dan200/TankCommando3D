@@ -4,6 +4,7 @@ using Dan200.Core.Math;
 using Dan200.Core.Physics;
 using Dan200.Core.Main;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Lua;
 using Dan200.Core.Systems;
 using Dan200.Core.Components;
@@ -14,6 +15,7 @@ using Dan200.Core.Components.Core;
 using Dan200.Game.Components.Misc;
 using Dan200.Game.Components.Weapons;
 using Dan200.Core.Serialisation;
+using Dan200.Core.Components.Physics;
 
 namespace Dan200.Game.Components.Player
 {
@@ -23,13 +25,13 @@ namespace Dan200.Game.Components.Player
         public float InteractDistance;
     }
 
-    [RequireSystem(typeof(PhysicsSystem))]
+    [RequireComponentOnAncestor(typeof(PhysicsWorldComponent))]
     [RequireComponent(typeof(PlayerInputComponent))]
 	[RequireComponent(typeof(PlayerMovementComponent))]
     [RequireComponent(typeof(HealthComponent))]
     internal class PlayerInteractionComponent : Component<PlayerInteractionComponentData>, IUpdate
 	{
-        private PhysicsSystem m_physics;
+        private PhysicsWorldComponent m_physics;
         private PlayerInputComponent m_input;
 		private PlayerMovementComponent m_movement;
         private HealthComponent m_health;
@@ -48,7 +50,7 @@ namespace Dan200.Game.Components.Player
 
         protected override void OnInit(in PlayerInteractionComponentData properties)
 		{
-            m_physics = Level.GetSystem<PhysicsSystem>();
+            m_physics = Entity.GetComponentOnAncestor<PhysicsWorldComponent>();
             m_input = Entity.GetComponent<PlayerInputComponent>();
 			m_movement = Entity.GetComponent<PlayerMovementComponent>();
             m_health = Entity.GetComponent<HealthComponent>();

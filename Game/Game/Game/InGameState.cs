@@ -2,7 +2,6 @@
 using Dan200.Core.GUI;
 using Dan200.Core.Input;
 using Dan200.Core.Level;
-using Dan200.Core.Level.Messages;
 using Dan200.Core.Lua;
 using Dan200.Core.Main;
 using Dan200.Core.Math;
@@ -11,7 +10,6 @@ using Dan200.Core.Network;
 using Dan200.Core.Physics;
 using Dan200.Core.Render;
 using Dan200.Game.Level;
-using Dan200.Game.Messages;
 using Dan200.Game.Script;
 using Dan200.Game.User;
 using System;
@@ -43,12 +41,11 @@ namespace Dan200.Game.Game
         {
         }
 
-		public override void AddSystems(Core.Level.Level level, LevelSaveData save)
+        public override void AddSystems(Core.Level.Level level, LevelSaveData save)
 		{
             base.AddSystems(level, save);
 
             level.AddSystem(new ChatterSystem(), save);
-            level.AddSystem(new NavigationSystem(), save);
             level.AddSystem(new NoiseSystem(), save);
         }
 
@@ -71,10 +68,10 @@ namespace Dan200.Game.Game
 
             // Create a player entity
             var playerProperties = new LuaTable();
+            playerProperties["Name"] = "Player";
             playerProperties["Position"] = spawnTransform.Position.ToLuaValue();
             playerProperties["Rotation"] = (spawnTransform.GetRotationAngles() * Mathf.RADIANS_TO_DEGREES).ToLuaValue();
-			m_player = EntityPrefab.Get("entities/player.entity").Instantiate(Level, playerProperties);
-            m_player.Persist = false;
+			m_player = EntityPrefab.Get("entities/player.entity").Instantiate(Level, playerProperties, 1); // TODO
 
             // Set the player's settings
             var playerSettings = m_player.GetComponent<PlayerSettingsComponent>();
@@ -92,7 +89,7 @@ namespace Dan200.Game.Game
             CameraProvider = playerCamera;
 
             // Create the pause menu
-            m_controls = new ControlsDisplay();
+            m_controls = new ControlsDisplay(playerSettings.Settings, input.Mapper);
             m_controls.Anchor = Anchor.TopLeft | Anchor.BottomRight;
             m_controls.LocalPosition = Vector2.Zero;
             m_controls.Size = Game.Screen.Size;

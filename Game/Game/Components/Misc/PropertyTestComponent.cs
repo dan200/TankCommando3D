@@ -38,7 +38,7 @@ namespace Dan200.Game.Components.Misc
         {
         }
 
-        protected override void ReInit(in PropertyTestComponentData properties)
+        protected override void Reset(in PropertyTestComponentData properties)
         {
         }
 

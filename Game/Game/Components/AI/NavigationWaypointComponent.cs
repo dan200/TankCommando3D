@@ -16,11 +16,11 @@ namespace Dan200.Game.Components.AI
     {
     }
 
-    [RequireSystem(typeof(NavigationSystem))]
+    [RequireComponentOnAncestor(typeof(NavGraphComponent))]
     [RequireComponent(typeof(TransformComponent))]
     internal class NavigationWaypointComponent : EditableComponent<NavigationWaypointComponentData>
     {
-        private NavigationSystem m_navigation;
+        private NavGraphComponent m_navigation;
         private NavGraph.Node m_node;
 
         public NavGraph.Node Node
@@ -33,12 +33,12 @@ namespace Dan200.Game.Components.AI
 
         protected override void OnInit(in NavigationWaypointComponentData properties)
         {
-            m_navigation = Level.GetSystem<NavigationSystem>();
+            m_navigation = Entity.GetComponentOnAncestor<NavGraphComponent>();
             m_node = null;
-            ReInit(properties);
+            Reset(properties);
         }
 
-        protected override void ReInit(in NavigationWaypointComponentData properties)
+        protected override void Reset(in NavigationWaypointComponentData properties)
         {
             if(m_node != null)
             {

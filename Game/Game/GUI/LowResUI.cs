@@ -22,7 +22,7 @@ namespace Dan200.Game.GUI
         {
             get
             {
-                return 33;
+                return 11;
             }
         }
 
@@ -38,7 +38,7 @@ namespace Dan200.Game.GUI
         {
             get
             {
-                return 60;
+                return 20;
             }
         }
 

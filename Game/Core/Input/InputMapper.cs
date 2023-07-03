@@ -36,7 +36,7 @@ namespace Dan200.Core.Input
             }
             else
             {
-                return "Invalid";
+                return "Unbound";
             }
         }
     }
@@ -51,7 +51,7 @@ namespace Dan200.Core.Input
 
             public InputMapping(string name)
             {
-                Input = new Input(name, "?");
+                Input = new Input(name, "Inputs.Unbound");
                 Sources = new List<InputOrigin>();
                 SourceInputs = new List<Pair<Input, DeviceCategory>>();
             }
@@ -59,7 +59,7 @@ namespace Dan200.Core.Input
 
         private DeviceCollection m_devices;
         private Dictionary<string, InputMapping> m_mappings;
-        private DeviceCategory m_activeDeviceCategory;
+        private DeviceCategory m_lastUsedDeviceCategory;
         private bool m_sourceInputsNeedUpdate;
 
         public DeviceCollection Devices
@@ -70,11 +70,19 @@ namespace Dan200.Core.Input
             }
         }
 
+        public DeviceCategory LastUsedDeviceCategory
+        {
+            get
+            {
+                return m_lastUsedDeviceCategory;
+            }
+        }
+
         public InputMapper(DeviceCollection devices)
         {
             m_devices = devices;
             m_mappings = new Dictionary<string, InputMapping>();
-            m_activeDeviceCategory = DeviceCategory.Keyboard;
+            m_lastUsedDeviceCategory = DeviceCategory.Keyboard;
             m_sourceInputsNeedUpdate = false;
             devices.OnDeviceAdded += OnDeviceAdded;
             devices.OnDeviceRemoved += OnDeviceRemoved;
@@ -149,9 +157,16 @@ namespace Dan200.Core.Input
             return mapping.Input;
         }
 
-        public Axis GetAxis(string positive, string negative)
+        public Axis GetAxis(string positive, string negative, AxisDirection direction)
         {
-            return new Axis(GetInput(positive), GetInput(negative));
+            return new Axis(GetInput(positive), GetInput(negative), direction);
+        }
+
+        public AxisPair GetAxisPair(string up, string down, string left, string right)
+        {
+            return new AxisPair(
+                GetInput(up), GetInput(down), GetInput(left), GetInput(right)
+            );
         }
 
         private void UpdateSourceInputs(InputMapping mapping)
@@ -172,10 +187,10 @@ namespace Dan200.Core.Input
 
         private void UpdatePrompt(InputMapping mapping)
         {
-            mapping.Input.Prompt = "?";
+            mapping.Input.Prompt = "Inputs.Unbound";
             foreach(var pair in mapping.SourceInputs)
             {
-                if(ArePromptsCompatible(m_activeDeviceCategory, pair.Second))
+                if(ArePromptsCompatible(m_lastUsedDeviceCategory, pair.Second))
                 {
                     mapping.Input.Prompt = pair.First.Prompt;
                     break;
@@ -198,7 +213,7 @@ namespace Dan200.Core.Input
             }
 
             // Update input values
-            var activeDeviceCategory = m_activeDeviceCategory;
+            var lastUsedDeviceCategory = m_lastUsedDeviceCategory;
             foreach(var mapping in m_mappings.Values)
             {
                 float value = 0.0f;
@@ -208,14 +223,14 @@ namespace Dan200.Core.Input
                     value = Mathf.Max(value, input.Value);
                     if(input.Value > 0.0f)
                     {
-                        activeDeviceCategory = pair.Second;
+                        lastUsedDeviceCategory = pair.Second;
                     }
                 }
                 mapping.Input.Update(value);
             }
-            if(activeDeviceCategory != m_activeDeviceCategory)
+            if(lastUsedDeviceCategory != m_lastUsedDeviceCategory)
             {
-                m_activeDeviceCategory = activeDeviceCategory;
+                m_lastUsedDeviceCategory = lastUsedDeviceCategory;
                 promptsNeedUpdate = true;
             }
 

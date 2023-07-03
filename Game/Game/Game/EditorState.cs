@@ -2,7 +2,6 @@
 using Dan200.Core.GUI;
 using Dan200.Core.Input;
 using Dan200.Core.Level;
-using Dan200.Core.Level.Messages;
 using Dan200.Core.Lua;
 using Dan200.Core.Main;
 using Dan200.Core.Math;
@@ -11,7 +10,6 @@ using Dan200.Core.Network;
 using Dan200.Core.Physics;
 using Dan200.Core.Render;
 using Dan200.Game.Level;
-using Dan200.Game.Messages;
 using Dan200.Game.Script;
 using Dan200.Game.User;
 using System;
@@ -34,6 +32,7 @@ using Dan200.Core.Serialisation;
 using Dan200.Core.Assets;
 using Dan200.Core.Components.Core;
 using Dan200.Game.Systems.AI;
+using Dan200.Core.Components.Physics;
 
 namespace Dan200.Game.Game
 {
@@ -41,8 +40,8 @@ namespace Dan200.Game.Game
     {
         private string m_levelSavePath;
 
+        private PhysicsWorldComponent m_physics;
         private DebugCameraController m_camera;
-        private PhysicsSystem m_physics;
         private EditorComponent m_selectedEntity;
         private EditorComponent m_hoverEntity;
 
@@ -81,7 +80,7 @@ namespace Dan200.Game.Game
                 greyTheme.BoxColour.A = 128;
 
                 // Start the row
-                builder.Columns(0.0f, 24.0f);
+                builder.Columns(0.0f, 24.0f * DebugGUI.DEBUG_GUI_SCALE);
                 if (options.Optional)
                 {
                     if (io_value.IsNil())
@@ -425,7 +424,7 @@ namespace Dan200.Game.Game
                 if (m_entity != null)
                 {
                     builder.Label(m_entity.Prefab.Path);
-                    builder.Columns(0.0f, 24.0f);
+                    builder.Columns(0.0f, 24.0f * DebugGUI.DEBUG_GUI_SCALE);
                     bool changed = false;
 
                     if (m_entity.Entity.GetComponent<NameComponent>() != null)
@@ -452,7 +451,7 @@ namespace Dan200.Game.Game
                     }
                     if(changed)
                     {
-                        m_entity.ReInit();
+                        m_entity.ResetFromProperties();
                     }
                 }
                 else
@@ -498,36 +497,30 @@ namespace Dan200.Game.Game
             m_levelSavePath = levelSavePath;
             m_camera = new DebugCameraController(Game);
 
+            var margin = 16.0f * DebugGUI.DEBUG_GUI_SCALE;
             m_inspector = new InspectorWindow();
             m_inspector.Anchor = Anchor.TopLeft;
-            m_inspector.LocalPosition = new Vector2(16.0f, 16.0f);
-            m_inspector.Size = new Vector2(300.0f, 400.0f);
+            m_inspector.LocalPosition = new Vector2(margin, margin);
+            m_inspector.Size = new Vector2(300.0f, 400.0f) * DebugGUI.DEBUG_GUI_SCALE;
 
             m_level = new LevelWindow(this);
             m_level.Anchor = Anchor.TopRight;
-            m_level.Size = new Vector2(200.0f, 150.0f);
-            m_level.LocalPosition = new Vector2(-16.0f - m_level.Size.X, 16.0f);
+            m_level.Size = new Vector2(200.0f, 150.0f) * DebugGUI.DEBUG_GUI_SCALE;
+            m_level.LocalPosition = new Vector2(-margin - m_level.Size.X, margin);
 
-            var editorCamera = Level.GetSystem<NameSystem>().Lookup("EditorCamera");
+            var editorCamera = Level.GetSystem<NameSystem>().Lookup("./EditorCamera", RootEntity);
             if (editorCamera != null)
             {
                 m_camera.Transform = editorCamera.GetComponent<TransformComponent>().Transform;
             }
         }
 
-        public override void AddSystems(Core.Level.Level level, LevelSaveData save)
-		{
-            base.AddSystems(level, save);
-
-            level.AddSystem(new NavigationSystem(), save);
-		}
-
 		public override void Enter(GameState previous)
         {
 			base.Enter(previous);
             CameraProvider = m_camera;
 
-            m_physics = Level.GetSystem<PhysicsSystem>();
+            m_physics = RootEntity.GetComponent<PhysicsWorldComponent>();
             m_selectedEntity = null;
             m_hoverEntity = null;
 
@@ -628,8 +621,7 @@ namespace Dan200.Game.Game
             {
                 if (m_selectedEntity != null)
                 {
-                    var manipulator = m_selectedEntity.Entity.GetComponent<ManipulatorComponent>();
-                    if (manipulator != null)
+                    foreach(var manipulator in m_selectedEntity.Entity.GetComponentsWithInterface<IManipulator>())
                     {
                         if(manipulator.HandleMouseInput(mouse, Game.MainView.Camera))
                         {
@@ -713,12 +705,12 @@ namespace Dan200.Game.Game
         {
             // Setup creation info
             var creationInfo = new List<EntityCreationInfo>();
-            SetupEntityCreationInfoForEditor(prefab, properties, creationInfo);
+            SetupEntityCreationInfoForEditor(prefab, properties, creationInfo, true, RootEntity.ID);
             App.Assert(creationInfo.Count > 0);
 
             // Create the entities
             Level.Entities.Create(creationInfo);
-            Level.MakeNewComponentsLive();
+            Level.PromoteNewComponents();
 
             // Return the entity
             var entity = Level.Entities.Lookup(creationInfo[0].ID);

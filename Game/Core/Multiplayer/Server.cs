@@ -182,7 +182,7 @@ namespace Dan200.Core.Multiplayer
             // Disconnect all clients (including local)
             foreach (var client in m_clients)
             {
-                if (client.Status != ConnectionStatus.Disconnected)
+                if (client.State != ConnectionState.Disconnected)
                 {
                     client.Disconnect();
                 }
@@ -197,7 +197,7 @@ namespace Dan200.Core.Multiplayer
             for (int i = m_clients.Count - 1; i >= 0; --i)
             {
                 var client = m_clients[i];
-                if (client.Status != ConnectionStatus.Disconnected && !client.IsLocal)
+                if (client.State != ConnectionState.Disconnected && !client.IsLocal)
                 {
                     client.Disconnect();
                     m_clients.UnorderedRemoveAt(i);
@@ -206,11 +206,11 @@ namespace Dan200.Core.Multiplayer
             }
         }
 
-        public void Broadcast(IMessage message)
+        public void BroadcastMessage(ByteString message)
         {
             foreach (var client in m_connectedClients)
             {
-                client.Send(message);
+                client.SendMessage(message);
             }
         }
 
@@ -261,7 +261,7 @@ namespace Dan200.Core.Multiplayer
             }
         }
 
-        internal LocalConnection CreateLocalConnection()
+        public LocalConnection CreateLocalConnection()
         {
             LocalConnection serverSide, clientSide;
             CreateLocalConnectionPair(out serverSide, out clientSide);
@@ -269,12 +269,12 @@ namespace Dan200.Core.Multiplayer
             return clientSide;
         }
 
-        private void CreateLocalConnectionPair(out LocalConnection o_serverSide, out LocalConnection o_clientSide)
+        private void CreateLocalConnectionPair(out LocalConnection o_serverConnectionToClient, out LocalConnection o_clientConnectionToServer)
         {
             var clientPacketBuffer = new RingBuffer();
             var serverPacketBuffer = new RingBuffer();
-            o_serverSide = new LocalConnection(clientPacketBuffer, serverPacketBuffer);
-            o_clientSide = new LocalConnection(serverPacketBuffer, clientPacketBuffer);
+            o_serverConnectionToClient = new LocalConnection(clientPacketBuffer, serverPacketBuffer);
+            o_clientConnectionToServer = new LocalConnection(serverPacketBuffer, clientPacketBuffer);
         }
     }
 }

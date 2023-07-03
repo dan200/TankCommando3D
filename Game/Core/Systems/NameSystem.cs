@@ -71,7 +71,7 @@ namespace Dan200.Core.Systems
 				}
 				else
 				{
-					App.LogWarning("Multiple entities named {0} ({1], {2}) on the same parent. Only {1} will the findable", name, existing.ID, entity.ID);
+					App.LogWarning("Multiple entities named {0} ({1}, {2}) on the same parent. Only {1} will the findable", name, existing.ID, entity.ID);
 				}
 			}
 			else
@@ -175,7 +175,7 @@ namespace Dan200.Core.Systems
 				}
 				else
 				{
-					App.LogWarning("Multiple entities named {0} ({1], {2}) on the same parent. Only {1} will the findable", name, existing.ID, entity.ID);
+					App.LogWarning("Multiple entities named {0} ({1}, {2}) on the same parent. Only {1} will the findable", name, existing.ID, entity.ID);
 				}
 			}
 			else

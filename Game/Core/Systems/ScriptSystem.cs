@@ -5,6 +5,7 @@ using Dan200.Core.Script;
 using Dan200.Core.Main;
 using Dan200.Core.Util;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Level;
 
 namespace Dan200.Core.Systems

@@ -31,10 +31,10 @@ namespace Dan200.Core.Components.Physics
 			base.OnInit(properties);
         }
 
-        protected override void ReInit(in SphereCollisionComponentData properties)
+        protected override void Reset(in SphereCollisionComponentData properties)
         {
             m_properties = properties;
-            base.ReInit(properties);
+            base.Reset(properties);
         }
 
         protected override void OnShutdown()

@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace Dan200.Core.Multiplayer
-{
+{ 
     internal interface IConnectionListener : IDisposable
     {
         bool IsOpen { get; }

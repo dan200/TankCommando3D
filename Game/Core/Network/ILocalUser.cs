@@ -11,7 +11,7 @@ namespace Dan200.Core.Network
 
 		void UnlockAchievement(Achievement achievement);
         void RemoveAchievement(Achievement achievement);
-        void IndicateAchievementProgress(Achievement achievement, int currentValue, int unlockValue);
+        void UpdateAchievementProgress(Achievement achivement, int currentValue, int unlockValue, bool notify);
 
 		void AddStatistic(Statistic statistic, int count);
         void SetStatistic(Statistic statistic, int count);

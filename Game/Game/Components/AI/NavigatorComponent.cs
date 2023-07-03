@@ -17,11 +17,11 @@ namespace Dan200.Game.Components.AI
     {
     }
 
-    [RequireSystem(typeof(NavigationSystem))]
+    [RequireComponentOnAncestor(typeof(NavGraphComponent))]
     [RequireComponent(typeof(TransformComponent))]
     internal class NavigatorComponent : Component<NavigatorComponentData>
     {
-        private NavigationSystem m_navigation;
+        private NavGraphComponent m_navigation;
         private TransformComponent m_transform;
 
         private List<NavGraph.Node> m_currentRoute;
@@ -46,9 +46,17 @@ namespace Dan200.Game.Components.AI
             }
         }
 
+        public NavGraph.Node DestinationWaypoint
+        {
+            get
+            {
+                return m_currentRoute.LastOrDefault();
+            }
+        }
+
         protected override void OnInit(in NavigatorComponentData properties)
         {
-            m_navigation = Level.GetSystem<NavigationSystem>();
+            m_navigation = Entity.GetComponentOnAncestor<NavGraphComponent>();
             m_transform = Entity.GetComponent<TransformComponent>();
 
             m_currentRoute = new List<NavGraph.Node>();

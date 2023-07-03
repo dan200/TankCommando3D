@@ -1,7 +1,7 @@
 ﻿<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{98CA8686-FA26-49D2-A7F8-0DBB99122340}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>Dan200</RootNamespace>
@@ -13,7 +13,7 @@
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>False</Optimize>
@@ -28,7 +28,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <NoWarn>CS0649</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>True</Optimize>
     <OutputPath>bin\Release</OutputPath>
@@ -37,10 +37,12 @@
     <ConsolePause>False</ConsolePause>
     <LangVersion>Latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DefineConstants>SDL;STEAMWORKS_LIN_OSX;ZIP;</DefineConstants>
+    <NoWarn>CS0649;CS0162</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'SteamDebug|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'SteamDebug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -48,48 +50,56 @@
     <DefineConstants>DEBUG;SDL;STEAM;STEAMWORKS_LIN_OSX;ZIP;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>Latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ConsolePause>false</ConsolePause>
+    <NoWarn>CS0649</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'SteamRelease|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'SteamRelease|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\SteamRelease</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>Latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ConsolePause>false</ConsolePause>
     <DefineConstants>SDL;STEAM;STEAMWORKS_LIN_OSX;ZIP;</DefineConstants>
+    <NoWarn>CS0649;CS0162</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'ReleaseWindows|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'ReleaseWindows|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\ReleaseWindows</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>Latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ConsolePause>false</ConsolePause>
-    <DefineConstants>SDL;WINOWS;STEAMWORKS_WIN;ZIP;</DefineConstants>
+    <DefineConstants>SDL;WINDOWS;STEAMWORKS_WIN;ZIP;</DefineConstants>
+    <NoWarn>CS0649;CS0162</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'SteamReleaseWindows|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'SteamReleaseWindows|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\SteamReleaseWindows</OutputPath>
     <DefineConstants>SDL;WINDOWS;STEAM;STEAMWORKS_WIN;ZIP;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>Latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ConsolePause>false</ConsolePause>
+    <NoWarn>CS0649;CS0162</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'SteamDebugWindows|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'SteamDebugWindows|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -97,12 +107,14 @@
     <DefineConstants>DEBUG;SDL;WINDOWS;STEAM;STEAMWORKS_WIN;ZIP;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>Latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ConsolePause>false</ConsolePause>
+    <NoWarn>CS0649</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'DebugWindows|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'DebugWindows|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -113,13 +125,20 @@
     <ConsolePause>false</ConsolePause>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>Latest</LangVersion>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>CS0649</NoWarn>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Content Include="MiniTK.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Audio\Synth.cs" />
+    <Compile Include="Core\Audio\SynthChannel.cs" />
+    <Compile Include="Core\Audio\SynthSettings.cs" />
+    <Compile Include="Core\Components\Audio\SynthComponent.cs" />
+    <Compile Include="Game\Interfaces\IManipulator.cs" />
     <Compile Include="Contrib\ODE\nulong.cs" />
     <Compile Include="Contrib\ODE\nlong.cs" />
     <Compile Include="Contrib\ODE\ODE.cs" />
@@ -138,8 +157,7 @@
     <Compile Include="Core\Geometry\Plane.cs" />
     <Compile Include="Core\Geometry\Sphere.cs" />
     <Compile Include="Core\GUI\Anchor.cs" />
-    <Compile Include="Core\GUI\Button.cs" />
-    <Compile Include="Core\GUI\ButtonBase.cs" />
+    <Compile Include="Core\Level\EditableComponent.cs" />
     <Compile Include="Game\Components\AI\CharacterNameComponent.cs" />
     <Compile Include="Game\Components\AI\PatrolRouteComponent.cs" />
     <Compile Include="Game\Components\AI\TankSpawnPointComponent.cs" />
@@ -147,7 +165,9 @@
     <Compile Include="Game\Components\Player\PlayerStatsComponent.cs" />
     <Compile Include="Game\Components\Player\PlayerTrackerComponent.cs" />
     <Compile Include="Game\Components\Player\TrackableComponent.cs" />
+    <Compile Include="Game\Components\Weapons\AmmoComponent.cs" />
     <Compile Include="Game\Components\Weapons\GrenadeComponent.cs" />
+    <Compile Include="Game\Components\Weapons\WeaponComponent.cs" />
     <Compile Include="Game\Components\Weapons\WeaponSpawnPointComponent.cs" />
     <Compile Include="Game\GUI\ControlsDisplay.cs" />
     <Compile Include="Game\GUI\GameOverDisplay.cs" />
@@ -156,11 +176,9 @@
     <Compile Include="Core\GUI\TouchPress.cs" />
     <Compile Include="Core\GUI\MousePress.cs" />
     <Compile Include="Core\GUI\Element.cs" />
-    <Compile Include="Core\GUI\IButtonPress.cs" />
     <Compile Include="Core\GUI\InputPress.cs" />
     <Compile Include="Core\GUI\IPress.cs" />
     <Compile Include="Core\GUI\Screen.cs" />
-    <Compile Include="Core\GUI\Label.cs" />
     <Compile Include="Core\GUI\TextBox.cs" />
     <Compile Include="Core\Input\GamepadAxis.cs" />
     <Compile Include="Core\Input\GamepadButton.cs" />
@@ -177,7 +195,6 @@
     <Compile Include="Core\Input\Input.cs" />
     <Compile Include="Core\Interfaces\IDebugDraw.cs" />
     <Compile Include="Core\Interfaces\IPrepareToDraw.cs" />
-    <Compile Include="Core\Interfaces\ISave.cs" />
     <Compile Include="Core\Level\BeforeSystemAttribute.cs" />
     <Compile Include="Core\Level\AfterSystemAttribute.cs" />
     <Compile Include="Core\Level\BeforeComponentAttribute.cs" />
@@ -206,10 +223,9 @@
     <Compile Include="Core\Math\Vector3.cs" />
     <Compile Include="Core\Math\Quaternion.cs" />
     <Compile Include="Core\Math\Vector4I.cs" />
-    <Compile Include="Core\Multiplayer\ConnectionStatus.cs" />
+    <Compile Include="Core\Multiplayer\ConnectionState.cs" />
     <Compile Include="Core\Multiplayer\IConnectionListener.cs" />
     <Compile Include="Core\Multiplayer\IConnection.cs" />
-    <Compile Include="Core\Multiplayer\IMessage.cs" />
     <Compile Include="Core\Multiplayer\LocalConnection.cs" />
     <Compile Include="Core\Multiplayer\Packet.cs" />
     <Compile Include="Core\Multiplayer\RemoteConnection.cs" />
@@ -246,7 +262,6 @@
     <Compile Include="Core\Render\VertexLayout.cs" />
     <Compile Include="Core\Render\VertexTypes.cs" />
     <Compile Include="Core\Systems\GUISystem.cs" />
-    <Compile Include="Core\Systems\PhysicsSystem.cs" />
     <Compile Include="Core\Systems\LightingSystem.cs" />
     <Compile Include="Core\Systems\AudioSystem.cs" />
     <Compile Include="Core\Systems\ScriptSystem.cs" />
@@ -296,15 +311,11 @@
     <Compile Include="Game\GUI\ChatterDisplay.cs" />
     <Compile Include="Game\GUI\HealthDisplay.cs" />
     <Compile Include="Game\GUI\LowResUI.cs" />
+    <Compile Include="Game\Interfaces\IDamagePropagator.cs" />
     <Compile Include="Game\Interfaces\IDamageOrigin.cs" />
-    <Compile Include="Game\Messages\ChatMessage.cs" />
-    <Compile Include="Core\Level\Messages\CreateEntityMessage.cs" />
-    <Compile Include="Core\Level\Messages\DestroyEntityMessage.cs" />
-    <Compile Include="Core\Level\Messages\EntityMessage.cs" />
     <Compile Include="Game\Script\DevAPI.cs" />
     <Compile Include="Game\Script\ConsoleAPI.cs" />
     <Compile Include="Game\Systems\AI\ChatterSystem.cs" />
-    <Compile Include="Game\Systems\AI\NavigationSystem.cs" />
     <Compile Include="Game\Systems\GameSystems.cs" />
     <Compile Include="Game\User\Settings.cs" />
     <Compile Include="Game\User\User.cs" />
@@ -313,7 +324,6 @@
     <Compile Include="Core\Main\App.cs" />
     <Compile Include="Core\Main\IGame.cs" />
     <Compile Include="Core\Main\ProgramArguments.cs" />
-    <Compile Include="Core\GUI\Image.cs" />
     <Compile Include="Core\Main\GameInfo.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Game\User\Progress.cs" />
@@ -393,7 +403,6 @@
     <Compile Include="Core\Audio\OpenAL\OpenALSoundSource.cs" />
     <Compile Include="Core\Audio\OpenAL\OpenALSoundPlayback.cs" />
     <Compile Include="Game\Level\Sky.cs" />
-    <Compile Include="Game\Level\SkyInstance.cs" />
     <Compile Include="Core\Render\AntiAliasingMode.cs" />
     <Compile Include="Core\Lua\LuaArgs.cs" />
     <Compile Include="Core\Lua\LuaCoroutine.cs" />
@@ -511,7 +520,6 @@
     <Compile Include="Core\Util\StructComparer.cs" />
     <Compile Include="Contrib\Lua\MonoPInvokeCallbackAttribute.cs" />
     <Compile Include="Core\Input\IVibrator.cs" />
-    <Compile Include="Core\GUI\TextButton.cs" />
     <Compile Include="Game\Game\ICameraProvider.cs" />
     <Compile Include="Core\Render\Colour.cs" />
     <Compile Include="Core\Render\ColourF.cs" />
@@ -529,14 +537,12 @@
     <Compile Include="Core\Render\View.cs" />
     <Compile Include="Core\Render\MTLFile.cs" />
     <Compile Include="Core\GUI\InputPrompt.cs" />
-    <Compile Include="Core\Multiplayer\MessageFactory.cs" />
     <Compile Include="Core\Util\SeekableStream.cs" />
     <Compile Include="Core\Util\RingBuffer.cs" />
     <Compile Include="Core\Util\StreamExtensions.cs" />
     <Compile Include="Core\Network\IRemoteUser.cs" />
     <Compile Include="Core\Network\OnlineStatus.cs" />
     <Compile Include="Core\Network\Steamworks\SteamworksRemoteUser.cs" />
-    <Compile Include="Game\Level\Player.cs" />
     <Compile Include="Core\Lua\ILuaEncoder.cs" />
     <Compile Include="Core\Lua\ILuaDecoder.cs" />
     <Compile Include="Core\Lua\LONEncoder.cs" />
@@ -554,10 +560,7 @@
     <Compile Include="Core\Multiplayer\NetworkWriter.cs" />
     <Compile Include="Core\Multiplayer\NetworkReader.cs" />
     <Compile Include="Core\Level\IInterface.cs" />
-    <Compile Include="Core\Interfaces\IUpdate.cs" />
     <Compile Include="Core\Interfaces\IDraw.cs" />
-    <Compile Include="Core\Interfaces\IPhysicsUpdate.cs" />
-    <Compile Include="Core\Interfaces\IUpdatePrePhysics.cs" />
     <Compile Include="Core\Level\IComponentInterface.cs" />
     <Compile Include="Core\Level\LevelRenderer.cs" />
     <Compile Include="Core\Level\RequireComponentAttribute.cs" />
@@ -588,14 +591,11 @@
     <Compile Include="Game\Options\FOVOption.cs" />
     <Compile Include="Game\Options\MouseSensitivityOption.cs" />
     <Compile Include="Core\Util\StateMachine.cs" />
-    <Compile Include="Core\Interfaces\IHierarchyListener.cs" />
-    <Compile Include="Core\Interfaces\IComponentListener.cs" />
     <Compile Include="Core\Physics\PhysicsShape.cs" />
     <Compile Include="Core\Physics\PhysicsBox.cs" />
     <Compile Include="Core\Physics\PhysicsSphere.cs" />
     <Compile Include="Core\Physics\PhysicsCylinder.cs" />
     <Compile Include="Core\Physics\PhysicsCapsule.cs" />
-    <Compile Include="Core\Interfaces\IAncestryListener.cs" />
     <Compile Include="Core\Util\GlobalRandom.cs" />
     <Compile Include="Core\Network\Achievement.cs" />
     <Compile Include="Core\Network\Statistic.cs" />
@@ -603,7 +603,7 @@
     <Compile Include="Core\Platform\IPlatform.cs" />
     <Compile Include="Core\Platform\SDL2\SDL2Platform.cs" />
     <Compile Include="Core\Util\EmptyArray.cs" />
-    <Compile Include="Core\Platform\PlatformID.cs" />
+    <Compile Include="Core\Platform\PlatformType.cs" />
     <Compile Include="Core\Window\Headless\HeadlessWindow.cs" />
     <Compile Include="Core\Render\IRenderer.cs" />
     <Compile Include="Core\Render\OpenGL\OpenGLRenderer.cs" />
@@ -614,7 +614,6 @@
     <Compile Include="Core\Render\OpenGL\OpenGLEffectInstance.cs" />
     <Compile Include="Core\Render\EffectHelper.cs" />
     <Compile Include="Core\Geometry\Bezier.cs" />
-    <Compile Include="Core\Interfaces\IDescendantListener.cs" />
     <Compile Include="Core\Render\ShaderDefines.cs" />
     <Compile Include="Core\Render\EffectHelpers\BlitEffectHelper.cs" />
     <Compile Include="Core\Render\EffectHelpers\FlatEffectHelper.cs" />
@@ -634,7 +633,6 @@
     <Compile Include="Core\Geometry\ConvexHull.cs" />
     <Compile Include="Core\Physics\PhysicsConvexHull.cs" />
     <Compile Include="Game\Game\GameThreadPool.cs" />
-    <Compile Include="Core\Render\IRenderGeometry.cs" />
     <Compile Include="Core\Render\OpenGL\OpenGLRenderGeometry.cs" />
     <Compile Include="Core\Voxel\VoxelWorld.cs" />
     <Compile Include="Core\Math\Vector3I.cs" />
@@ -701,17 +699,46 @@
     <Compile Include="Core\GUI\DebugWindow.cs" />
     <Compile Include="Core\Util\LONMacros.cs" />
     <Compile Include="Game\Components\Misc\PropertyTestComponent.cs" />
-    <Compile Include="Game\Components\Editor\ManipulatorComponent.cs" />
+    <Compile Include="Game\Components\Editor\TransformManipulatorComponent.cs" />
     <Compile Include="Core\Input\MouseWheelDirection.cs" />
     <Compile Include="Core\Input\JoystickAxisDirection.cs" />
     <Compile Include="Core\Input\JoystickHatDirection.cs" />
     <Compile Include="Game\Game\TestState.cs" />
     <Compile Include="Game\Systems\AI\NoiseSystem.cs" />
+    <Compile Include="Core\Input\AxisPair.cs" />
+    <Compile Include="Core\Input\InputPromptUtils.cs" />
+    <Compile Include="Core\Util\LockFreeQueue.cs" />
+    <Compile Include="Core\Interfaces\Multiplayer\IReplicatable.cs" />
+    <Compile Include="Core\Interfaces\Multiplayer\IMessageReceiver.cs" />
+    <Compile Include="Core\Interfaces\Physics\IPhysicsUpdate.cs" />
+    <Compile Include="Core\Interfaces\Core\IAncestryListener.cs" />
+    <Compile Include="Core\Interfaces\Core\IComponentListener.cs" />
+    <Compile Include="Core\Interfaces\Core\IHierarchyListener.cs" />
+    <Compile Include="Core\Interfaces\Core\IResettable.cs" />
+    <Compile Include="Core\Interfaces\Core\IUpdate.cs" />
+    <Compile Include="Core\Components\GUI\GUIElementComponent.cs" />
+    <Compile Include="Core\Components\GUI\GUIImageComponent.cs" />
+    <Compile Include="Core\Components\GUI\GUILabelComponent.cs" />
+    <Compile Include="Core\Components\GUI\GUIButtonComponent.cs" />
+    <Compile Include="Core\Components\Physics\PhysicsWorldComponent.cs" />
+    <Compile Include="Game\Components\AI\NavGraphComponent.cs" />
+    <Compile Include="Core\Components\GUI\GUIScreenComponent.cs" />
+    <Compile Include="Core\GUI\IAreaProvider.cs" />
+    <Compile Include="Core\GUI\IScreen.cs" />
+    <Compile Include="Core\GUI\Image.cs" />
+    <Compile Include="Core\GUI\Label.cs" />
+    <Compile Include="Core\GUI\TextAlignment.cs" />
+    <Compile Include="Core\Multiplayer\IReplicator.cs" />
+    <Compile Include="Core\Level\RequireComponentOnAncestorAttribute.cs" />
+    <Compile Include="Core\GUI\TextStyle.cs" />
+    <Compile Include="Core\Render\IRenderGeometry.cs" />
+    <Compile Include="Core\GUI\VerticalTextAlignment.cs" />
+    <Compile Include="Core\Components\GUI\GUINineSliceComponent.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MiniTK, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Redirection\Redirection\MiniTK.dll</HintPath>
+      <HintPath>MiniTK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -734,6 +761,7 @@
     <Content Include="SDL2-CS.dll" />
     <None Include="Contrib\NVorbis\NVorbis.csproj" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup />
   <ItemGroup />
   <ItemGroup />

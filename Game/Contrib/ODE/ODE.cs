@@ -5,7 +5,7 @@ namespace ODE
 {
     public static unsafe class ODE
     {
-#if DEBUG
+#if DEBUG && !WINDOWS
         private const string LIBNAME = "ode_singled";
 #else
         private const string LIBNAME = "ode_single";

@@ -1,4 +1,5 @@
-﻿using Dan200.Core.Level;
+﻿using Dan200.Core.Components.Core;
+using Dan200.Core.Level;
 using Dan200.Core.Lua;
 using Dan200.Core.Main;
 using Dan200.Core.Math;
@@ -17,15 +18,18 @@ namespace Dan200.Game.Components.Player
     {
     }
 
+    [RequireComponent(typeof(TransformComponent))]
     [RequireComponent(typeof(PlayerMovementComponent))]
     [RequireComponent(typeof(PlayerSettingsComponent))]
     internal class PlayerCameraComponent : Component<PlayerCameraComponentData>, ICameraProvider
     {
+        private TransformComponent m_transform;
         private PlayerMovementComponent m_movement;
         private PlayerSettingsComponent m_settings;
 
         protected override void OnInit(in PlayerCameraComponentData properties)
         {
+            m_transform = Entity.GetComponent<TransformComponent>();
             m_movement = Entity.GetComponent<PlayerMovementComponent>();
             m_settings = Entity.GetComponent<PlayerSettingsComponent>();
         }
@@ -36,12 +40,8 @@ namespace Dan200.Game.Components.Player
 
         public void Populate(Camera camera)
         {
-            camera.Transform = Matrix4.CreateLookAt(
-                m_movement.EyePos,
-                m_movement.EyePos + m_movement.EyeLook,
-                Vector3.YAxis
-            );
-            camera.Velocity = m_movement.Velocity;
+            camera.Transform = m_movement.EyeTransform;
+            camera.Velocity = m_transform.Velocity;
             camera.FOV = m_settings.Settings.FOV * Mathf.DEGREES_TO_RADIANS;
         }
     }

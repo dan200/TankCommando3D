@@ -1,6 +1,7 @@
 ﻿-- Entity data
 {
 	Components = {
+		Name = {},
 		Hierarchy = {},
 		Transform = {
 			Position = Property("Position"),
@@ -13,7 +14,7 @@
 		PlayerSettings = {},
 		PlayerMovement = {
 			Radius = 0.35,
-			Height = 1.83,
+			Height = 1.9,
 			CrouchedHeight = 1.0,
 			GroundClearance = 0.25,
 			EyeHeight = 1.77,
@@ -22,13 +23,14 @@
 			WalkSpeed = 3.2,
 			Acceleration = 20,
 			Decceleration = 50,
-			AirAcceleration = 8,
+			AirAcceleration = 12,
+			StrideLength = 2,
 
 			CrouchedSpeed = 1.8,
 			CrouchTransitionTime = 0.3,
 
 			GravityScale = 1.25,
-			JumpHeight = 0.6,
+			JumpHeight = 0.8,
 			NumDoubleJumps = 0,
 			FallDamageThreshold = 10.0,
 			FallDamageScale = 15,
@@ -38,6 +40,8 @@
 		},
 		PlayerWeaponHolder = {
 			ThrowChargeTime = 0.75,
+			WeaponBobScale = Vector2( 0.01, 0.02 ),
+			WeaponOffset = Vector3( 0.0, 0.0, 0.1 ),
 		},
 		PlayerTracker = {
 			ConfirmTime = 1.2,

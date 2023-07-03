@@ -22,6 +22,7 @@ namespace Dan200.Core.Audio.OpenAL
 
         private AudioContext m_context;
         private XRamExtension m_xram;
+
         private OpenALSoundSource[] m_sound;
         private OpenALMusicPlayback[] m_music;
         private OpenALCustomPlayback[] m_custom;
@@ -90,7 +91,7 @@ namespace Dan200.Core.Audio.OpenAL
             m_custom = new OpenALCustomPlayback[NUM_CUSTOM_SOURCES];
 
             // Configure OpenAL
-            AL.DistanceModel(ALDistanceModel.InverseDistanceClamped);
+            AL.DistanceModel(ALDistanceModel.LinearDistanceClamped);
             AL.DopplerFactor(1.0f);
             AL.DopplerVelocity(SPEED_OF_SOUND);
             ALUtils.CheckError();

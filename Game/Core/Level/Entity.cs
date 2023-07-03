@@ -1,4 +1,3 @@
-using Dan200.Core.Level.Messages;
 using Dan200.Core.Lua;
 using Dan200.Core.Main;
 using Dan200.Core.Math;
@@ -9,6 +8,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Collections;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Util;
 using System.Text;
 using Dan200.Core.Components;
@@ -23,9 +23,7 @@ namespace Dan200.Core.Level
         {
             Initialised = 1,
             Visible = 2,
-            Replicate = 4,
-            Dead = 8,
-            Persist = 16,
+            Dead = 4,
         }
 
         private int m_id;
@@ -76,44 +74,6 @@ namespace Dan200.Core.Level
             }
         }
 
-        public bool Replicate
-        {
-            get
-            {
-                return (m_flags & Flags.Replicate) != 0;
-            }
-            set
-            {
-                if (value)
-                {
-                    m_flags |= Flags.Replicate;
-                }
-                else
-                {
-                    m_flags &= ~Flags.Replicate;
-                }
-            }
-        }
-
-        public bool Persist
-        {
-            get
-            {
-                return (m_flags & Flags.Persist) != 0;
-            }
-            set
-            {
-                if (value)
-                {
-                    m_flags |= Flags.Persist;
-                }
-                else
-                {
-                    m_flags &= ~Flags.Persist;
-                }
-            }
-        }
-
         public bool Dead
         {
             get
@@ -125,7 +85,7 @@ namespace Dan200.Core.Level
         public Entity()
         {
             m_id = 0;
-            m_flags = Flags.Visible | Flags.Replicate | Flags.Persist;
+            m_flags = Flags.Visible;
 			m_componentsMask = new BitField();
             m_components = null;
         }
@@ -215,7 +175,8 @@ namespace Dan200.Core.Level
 
             // Check component requirements
             var componentRequirements = ComponentRegistry.GetRequiredComponents(componentID);
-            var missingComponents = (~m_componentsMask & componentRequirements);
+            var existingComponents = m_componentsMask;
+            var missingComponents = (~existingComponents & componentRequirements);
             if (!missingComponents.IsEmpty)
             {
                 var errorMessage = new StringBuilder();
@@ -226,6 +187,45 @@ namespace Dan200.Core.Level
                 }
                 errorMessage.Append(" required by component " + ComponentRegistry.GetComponentName(componentID));
                 throw new Exception(errorMessage.ToString());
+            }
+
+            // Check ancestor component requirements
+            var ancestorComponentRequirements = ComponentRegistry.GetRequiredComponentsOnAncestors(componentID);
+            if(!ancestorComponentRequirements.IsEmpty)
+            {
+                var hierarchyComponent = GetComponent<HierarchyComponent>();
+                var existingAncestorComponents = hierarchyComponent.ComponentsOnAncestorsMask;
+                var missingAncestorComponents = (~existingAncestorComponents & ancestorComponentRequirements);
+                if(!missingAncestorComponents.IsEmpty)
+                {
+                    var errorMessage = new StringBuilder();
+                    errorMessage.Append("Entity " + ID + " is missing ancestor components");
+                    foreach (var requiredID in missingAncestorComponents)
+                    {
+                        errorMessage.Append(" " + ComponentRegistry.GetComponentName(requiredID));
+                    }
+                    errorMessage.Append(" required by component " + ComponentRegistry.GetComponentName(componentID));
+                    throw new Exception(errorMessage.ToString());
+                }
+            }
+
+            var ancestorOrSelfComponentRequirements = ComponentRegistry.GetRequiredComponentsOnAncestorsOrSelf(componentID);
+            if (!ancestorOrSelfComponentRequirements.IsEmpty)
+            {
+                var hierarchyComponent = GetComponent<HierarchyComponent>();
+                var existingAncestorOrSelfComponents = hierarchyComponent.ComponentsOnAncestorsMask | existingComponents;
+                var missingAncestorOrSelfComponents = (~existingAncestorOrSelfComponents & ancestorComponentRequirements);
+                if (!missingAncestorOrSelfComponents.IsEmpty)
+                {
+                    var errorMessage = new StringBuilder();
+                    errorMessage.Append("Entity " + ID + " is missing ancestor components");
+                    foreach (var requiredID in missingAncestorOrSelfComponents)
+                    {
+                        errorMessage.Append(" " + ComponentRegistry.GetComponentName(requiredID));
+                    }
+                    errorMessage.Append(" required by component " + ComponentRegistry.GetComponentName(componentID));
+                    throw new Exception(errorMessage.ToString());
+                }
             }
 
             // Add the component
@@ -289,6 +289,8 @@ namespace Dan200.Core.Level
                 }
             }
 
+            // TODO: Check ancestor dependencies too!
+
 			// Get the component
 			var component = m_components.Get(this, componentID);
 			App.Assert(component != null);
@@ -306,9 +308,20 @@ namespace Dan200.Core.Level
             }
         }
 
+        public TComponent GetComponentOnAncestor<TComponent>(bool includeSelf = false) where TComponent : ComponentBase
+        {
+            var hierarchy = GetComponent<HierarchyComponent>();
+            if (hierarchy != null)
+            {
+                return hierarchy.GetAncestorWithComponent<TComponent>();
+            }
+            return null;
+        }
+
         public TComponent GetComponent<TComponent>() where TComponent : ComponentBase
         {
             var id = ComponentRegistry.GetComponentID<TComponent>();
+            App.Assert(id >= 0, string.Format("Component " + typeof(TComponent).Name + " is not registered"));
             return GetComponent(id) as TComponent;
         }
 

@@ -114,6 +114,14 @@ namespace Dan200.Core.Util
             }
         }
 
+        public static LuaValue ToLuaValue(this Vector2 vec)
+        {
+            var table = new LuaTable(2);
+            table["X"] = vec.X;
+            table["Y"] = vec.Y;
+            return table;
+        }
+
         public static LuaValue ToLuaValue(this Vector3 vec)
 		{
 			var table = new LuaTable(3);

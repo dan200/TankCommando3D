@@ -1,4 +1,5 @@
 ﻿using Dan200.Core.Input;
+using Dan200.Core.Math;
 using Dan200.Core.Render;
 using Dan200.Core.Util;
 using System;
@@ -19,6 +20,7 @@ namespace Dan200.Core.Window
         string Title { get; set; }
         int Width { get; }
         int Height { get; }
+        Vector2I Size { get; }
         bool Closed { get; }
         bool Fullscreen { get; set; }
         bool Maximised { get; }

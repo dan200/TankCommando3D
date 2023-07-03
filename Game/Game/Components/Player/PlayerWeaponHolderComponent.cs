@@ -4,6 +4,7 @@ using Dan200.Core.Math;
 using Dan200.Core.Physics;
 using Dan200.Core.Main;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Lua;
 using Dan200.Core.Systems;
 using Dan200.Core.Components;
@@ -23,9 +24,15 @@ namespace Dan200.Game.Components.Player
     {
         [Range(Min = 0.0)]
         public float ThrowChargeTime;
+
+        [Optional]
+        public Vector2 WeaponBobScale;
+
+        [Optional]
+        public Vector3 WeaponOffset;
     }
 
-    [RequireSystem(typeof(PhysicsSystem))]
+    [RequireComponentOnAncestor(typeof(PhysicsWorldComponent))]
     [RequireComponent(typeof(TransformComponent))]
     [RequireComponent(typeof(PlayerInputComponent))]
     [RequireComponent(typeof(PlayerMovementComponent))]
@@ -33,7 +40,7 @@ namespace Dan200.Game.Components.Player
     [RequireComponent(typeof(HealthComponent))]
     internal class PlayerWeaponHolderComponent : Component<PlayerWeaponHolderComponentData>, IUpdate, IDamageOrigin
 	{
-        private PhysicsSystem m_physics;
+        private PhysicsWorldComponent m_physics;
         private TransformComponent m_transform;
         private PlayerInputComponent m_input;
 		private PlayerMovementComponent m_movement;
@@ -41,12 +48,11 @@ namespace Dan200.Game.Components.Player
         private HealthComponent m_health;
         private PlayerWeaponHolderComponentData m_properties;
 
-        private Entity m_heldWeapon;
-        private float m_weaponBobPhase;
+        private WeaponComponent m_heldWeapon;
         private float m_weaponKickback;
         private float m_throwCharge;
 
-        public Entity Weapon
+        public WeaponComponent Weapon
         {
             get
             {
@@ -56,7 +62,7 @@ namespace Dan200.Game.Components.Player
 
         protected override void OnInit(in PlayerWeaponHolderComponentData properties)
 		{
-            m_physics = Level.GetSystem<PhysicsSystem>();
+            m_physics = Entity.GetComponentOnAncestor<PhysicsWorldComponent>();
             m_transform = Entity.GetComponent<TransformComponent>();
             m_input = Entity.GetComponent<PlayerInputComponent>();
 			m_movement = Entity.GetComponent<PlayerMovementComponent>();
@@ -65,7 +71,6 @@ namespace Dan200.Game.Components.Player
             m_properties = properties;
 
             m_heldWeapon = null;
-            m_weaponBobPhase = 0.0f;
             m_throwCharge = -1.0f;
         }
         
@@ -77,7 +82,7 @@ namespace Dan200.Game.Components.Player
 			}
 		}
 
-        public void TakeWeapon(Entity weapon)
+        public void TakeWeapon(WeaponComponent weapon)
         {
             if(m_heldWeapon != null)
             {
@@ -85,29 +90,28 @@ namespace Dan200.Game.Components.Player
             }
 
             m_heldWeapon = weapon;
-            m_weaponBobPhase = 0.0f;
             m_throwCharge = -1.0f;
 
-            var weaponHierarchy = m_heldWeapon.GetComponent<HierarchyComponent>();
+            var weaponHierarchy = m_heldWeapon.Entity.GetComponent<HierarchyComponent>();
             if(weaponHierarchy != null)
             {
-                weaponHierarchy.Parent = null;
+                weaponHierarchy.Parent = Level.Entities.Lookup(1); // TODO
             }
 
-            var weaponPhysics = m_heldWeapon.GetComponent<PhysicsComponent>();
+            var weaponPhysics = m_heldWeapon.Entity.GetComponent<PhysicsComponent>();
             if (weaponPhysics != null)
             {
                 weaponPhysics.Object.Kinematic = true;
                 weaponPhysics.Object.IgnoreCollision = true;
             }
 
-            var weaponGun = m_heldWeapon.GetComponent<GunComponent>();
+            var weaponGun = m_heldWeapon.Entity.GetComponent<GunComponent>();
             if (weaponGun != null)
             {
                 weaponGun.OnFired += OnWeaponFired;
             }
 
-            var despawner = m_heldWeapon.GetComponent<DespawnerComponent>();
+            var despawner = m_heldWeapon.Entity.GetComponent<DespawnerComponent>();
             if (despawner != null)
             {
                 despawner.CancelDespawn();
@@ -124,8 +128,8 @@ namespace Dan200.Game.Components.Player
             App.Assert(m_heldWeapon != null);
             App.Assert(charge >= 0.0f && charge <= 1.0f);
 
-            var weaponTransform = m_heldWeapon.GetComponent<TransformComponent>();
-            var weaponPhysics = m_heldWeapon.GetComponent<PhysicsComponent>();
+            var weaponTransform = m_heldWeapon.Entity.GetComponent<TransformComponent>();
+            var weaponPhysics = m_heldWeapon.Entity.GetComponent<PhysicsComponent>();
             if (weaponPhysics != null)
             {
                 var scaledCharge = Mathf.Pow(charge, 2.0f);
@@ -136,7 +140,7 @@ namespace Dan200.Game.Components.Player
                 weaponPhysics.Object.AngularVelocity += weaponTransform.Transform.Right * scaledCharge * 10.0f;
             }
 
-            var weaponGun = m_heldWeapon.GetComponent<GunComponent>();
+            var weaponGun = m_heldWeapon.Entity.GetComponent<GunComponent>();
             if (weaponGun != null)
             {
                 weaponGun.TriggerHeld = false;
@@ -145,8 +149,9 @@ namespace Dan200.Game.Components.Player
                 weaponGun.OnFired -= OnWeaponFired;
             }
 
-            var despawner = m_heldWeapon.GetComponent<DespawnerComponent>();
-            if(weaponGun != null && weaponGun.AmmoInClip == 0 && despawner != null)
+            var despawner = m_heldWeapon.Entity.GetComponent<DespawnerComponent>();
+            var weaponAmmo = m_heldWeapon.Entity.GetComponent<AmmoComponent>();
+            if (despawner != null && weaponAmmo != null && weaponAmmo.AmmoInClip == 0)
             {
                 despawner.Despawn();
             }
@@ -179,21 +184,21 @@ namespace Dan200.Game.Components.Player
             if (m_heldWeapon != null)
 			{
                 // Update weapon bob
-                m_weaponBobPhase += (m_movement.Velocity.WithY(0.0f).Length * dt) / 2.0f;
+                float weaponBobPhase = m_movement.Stride;
                 m_weaponKickback = Mathf.ApproachDecay(m_weaponKickback, 0.0f, dt, 3.0f);
 
                 // Position the weapon
                 var eyePos = m_movement.EyePos;
                 var eyeFwd = m_movement.EyeLook;
-                var weaponTransform = m_heldWeapon.GetComponent<TransformComponent>();
+                var weaponTransform = m_heldWeapon.Entity.GetComponent<TransformComponent>();
                 if(weaponTransform != null)
                 {
                     var eyeTransform = m_movement.EyeTransform;
                     var feetTransform = m_transform.Transform;
                     var gunPos = eyePos;
-                    gunPos += feetTransform.Forward * 0.1f;
-                    gunPos += 0.01f * eyeTransform.Right * Mathf.Sin(m_weaponBobPhase * 0.5f * Mathf.TWO_PI);
-                    gunPos += 0.02f * eyeTransform.Up * Mathf.Cos(m_weaponBobPhase * Mathf.TWO_PI);
+                    gunPos += feetTransform.ToWorldDir(m_properties.WeaponOffset);
+                    gunPos += m_properties.WeaponBobScale.X * eyeTransform.Right * Mathf.Sin(weaponBobPhase * 0.5f * Mathf.TWO_PI);
+                    gunPos += m_properties.WeaponBobScale.Y * eyeTransform.Up * Mathf.Cos(weaponBobPhase * Mathf.TWO_PI);
                     gunPos -= m_weaponKickback * eyeTransform.Forward;
                     weaponTransform.LocalTransform = Matrix4.CreateLookAt(gunPos, gunPos + eyeFwd, feetTransform.Up);
                     if (m_throwCharge > 0.0f)
@@ -205,12 +210,12 @@ namespace Dan200.Game.Components.Player
                             Matrix4.CreateTranslation(rotOffset) *
                             weaponTransform.LocalTransform;
                     }
-                    weaponTransform.LocalVelocity = m_movement.Velocity;
-                    weaponTransform.LocalAngularVelocity = m_movement.AngularVelocity;
+                    weaponTransform.LocalVelocity = m_transform.Velocity;
+                    weaponTransform.LocalAngularVelocity = m_transform.AngularVelocity;
                 }
 
                 // Fire the weapon
-                var weaponGun = m_heldWeapon.GetComponent<GunComponent>();
+                var weaponGun = m_heldWeapon.Entity.GetComponent<GunComponent>();
                 if (weaponGun != null)
                 {
                     if (m_input.Fire && m_throwCharge < 0.0f)
@@ -247,11 +252,11 @@ namespace Dan200.Game.Components.Player
                     {
                         m_throwCharge = 0.0f;
 
-                        var weaponGrenade = m_heldWeapon.GetComponent<GrenadeComponent>();
+                        var weaponGrenade = m_heldWeapon.Entity.GetComponent<GrenadeComponent>();
                         if (weaponGrenade != null)
                         {
                             weaponGrenade.DamageOrigin = Entity;
-                            weaponGrenade.LightFuse();
+                            weaponGrenade.Arm();
                         }
                     }
 

@@ -1,18 +1,19 @@
 ﻿using Dan200.Core.Main;
 using Dan200.Core.Util;
 using System;
+using System.IO;
 
 namespace Dan200.Core.Multiplayer
 {
     internal class LocalConnection : IConnection
     {
         private RingBuffer m_sendBuffer;
-        private NetworkWriter m_sendBufferWriter;
+        private BinaryWriter m_sendBufferWriter;
 
         private RingBuffer m_receiveBuffer;
-        private NetworkReader m_receiveBufferReader;
+        private BinaryReader m_receiveBufferReader;
 
-        private ConnectionStatus m_status;
+        private ConnectionState m_state;
 
         public bool IsLocal
         {
@@ -22,48 +23,37 @@ namespace Dan200.Core.Multiplayer
             }
         }
 
-        public TimeSpan PingTime
+        public float PingTime
         {
             get
             {
-                return TimeSpan.Zero;
+                return 0.0f;
             }
         }
 
-        public ConnectionStatus Status
+        public ConnectionState State
         {
             get
             {
-                return m_status;
+                return m_state;
             }
-        }
-
-        public LocalConnection(Server server)
-        {
-            // Bit of a hack: steal the internals of an object the server actually created
-            var connection = server.CreateLocalConnection();
-            m_sendBuffer = connection.m_sendBuffer;
-            m_sendBufferWriter = connection.m_sendBufferWriter;
-            m_receiveBuffer = connection.m_receiveBuffer;
-            m_receiveBufferReader = connection.m_receiveBufferReader;
-            m_status = connection.m_status;
         }
 
         public LocalConnection(RingBuffer sendBuffer, RingBuffer receiveBuffer)
         {
             m_sendBuffer = sendBuffer;
-			m_sendBufferWriter = new NetworkWriter(m_sendBuffer.OpenForWrite());
+            m_sendBufferWriter = new BinaryWriter(m_sendBuffer.OpenForWrite());
 
             m_receiveBuffer = receiveBuffer;
-			m_receiveBufferReader = new NetworkReader(m_receiveBuffer.OpenForRead());
+            m_receiveBufferReader = new BinaryReader(m_receiveBuffer.OpenForRead());
 
-            m_status = ConnectionStatus.Connecting;
+            m_state = ConnectionState.Connecting;
             m_sendBufferWriter.Write((byte)0); // Send a "handshake" to wake up the receiver
         }
 
         public void Dispose()
         {
-            if (m_status != ConnectionStatus.Disconnected)
+            if (m_state != ConnectionState.Disconnected)
             {
                 Disconnect();
             }
@@ -74,35 +64,35 @@ namespace Dan200.Core.Multiplayer
             CheckNotDisconnected();
             if (m_receiveBuffer.BytesAvailable > 0)
             {
-                if (m_status == ConnectionStatus.Connecting)
+                if (m_state == ConnectionState.Connecting)
                 {
-                    m_status = ConnectionStatus.Connected;
+                    m_state = ConnectionState.Connected;
                     o_packet = Packet.Connect;
                     m_receiveBufferReader.ReadByte(); // Throw away the handshake
                     return true;
                 }
 
-                bool hasPacket = m_receiveBufferReader.ReadBool();
-                if (!hasPacket)
+                int messageSize = m_receiveBufferReader.ReadInt32();
+                if (messageSize < 0)
                 {
                     Disconnect();
                     o_packet = Packet.Disconnect;
                     return true;
                 }
 
-                var message = MessageFactory.Decode(m_receiveBufferReader);
-                o_packet = new Packet(message);
+                var message = m_receiveBufferReader.ReadBytes(messageSize);
+                o_packet = new Packet(new ByteString(message));
                 return true;
             }
             o_packet = default(Packet);
             return false;
         }
 
-        public void Send(IMessage message)
+        public void SendMessage(ByteString message)
         {
             CheckConnected();
-            m_sendBufferWriter.Write(true);
-            MessageFactory.Encode(message, m_sendBufferWriter);
+            m_sendBufferWriter.Write(message.Length);
+            m_sendBufferWriter.Write(message);
         }
 
         public void Flush()
@@ -113,18 +103,18 @@ namespace Dan200.Core.Multiplayer
         public void Disconnect()
         {
             CheckNotDisconnected();
-            m_status = ConnectionStatus.Disconnected;
-            m_sendBufferWriter.Write(false);
+            m_state = ConnectionState.Disconnected;
+            m_sendBufferWriter.Write(-1);
         }
 
         private void CheckConnected()
         {
-            App.Assert(Status == ConnectionStatus.Connected);
+            App.Assert(State == ConnectionState.Connected);
         }
 
         private void CheckNotDisconnected()
         {
-            App.Assert(Status != ConnectionStatus.Disconnected);
+            App.Assert(State != ConnectionState.Disconnected);
         }
     }
 }

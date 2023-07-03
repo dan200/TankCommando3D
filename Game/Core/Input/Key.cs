@@ -272,116 +272,51 @@ namespace Dan200.Core.Input
 
         public static string GetPrompt(this Key key)
         {
-            var path = key.GetPromptPath();
-            if (path != null)
-            {
-                return '[' + path + ']';
-            }
-
-#if SDL
-            var name = SDL.SDL_GetKeyName((SDL.SDL_Keycode)key);
-            if (name != null && name.Length > 0)
-            {
-                return name;
-            }
-#endif
-
-            return key.ToString();
-        }
-
-        public static string GetPromptPath(this Key key)
-        {
-            string buttonName;
+            string keyName;
             switch (key)
             {
                 case Key.LeftGUI:
-                case Key.RightGUI:
                     {
-                        switch (App.PlatformID)
+                        switch (App.Platform.Type)
                         {
-                            case PlatformID.MacOS:
+                            case PlatformType.MacOS:
                                 {
-                                    buttonName = "cmd";
+                                    keyName = "LeftCmd";
                                     break;
                                 }
-                            case PlatformID.Windows:
+                            case PlatformType.Windows:
                             default:
                                 {
-                                    buttonName = "windows";
+                                    keyName = "LeftWindows";
                                     break;
                                 }
                         }
                         break;
                     }
-                case Key.LeftShift:
-                case Key.RightShift:
+                case Key.RightGUI:
                     {
-                        buttonName = "shift";
-                        break;
-                    }
-                case Key.LeftCtrl:
-                case Key.RightCtrl:
-                    {
-                        buttonName = "ctrl";
-                        break;
-                    }
-                case Key.LeftAlt:
-                case Key.RightAlt:
-                    {
-                        buttonName = "alt";
-                        break;
-                    }
-                case Key.Zero:
-                case Key.NumpadZero:
-                    {
-                        buttonName = "zero";
-                        break;
-                    }
-                case Key.NumpadOne:
-                case Key.NumpadTwo:
-                case Key.NumpadThree:
-                case Key.NumpadFour:
-                case Key.NumpadFive:
-                case Key.NumpadSix:
-                case Key.NumpadSeven:
-                case Key.NumpadEight:
-                case Key.NumpadNine:
-                    {
-                        var equivalentKey = (key - Key.NumpadOne) + Key.One;
-                        buttonName = equivalentKey.ToString().ToLowerUnderscored();
-                        break;
-                    }
-                case Key.Minus:
-                case Key.NumpadMinus:
-                    {
-                        buttonName = "minus";
-                        break;
-                    }
-                case Key.Period:
-                case Key.NumpadPeriod:
-                    {
-                        buttonName = "period";
-                        break;
-                    }
-                case Key.Comma:
-                case Key.NumpadComma:
-                    {
-                        buttonName = "comma";
-                        break;
-                    }
-                case Key.BackQuote:
-                    {
-                        buttonName = "tilde";
+                        switch (App.Platform.Type)
+                        {
+                            case PlatformType.MacOS:
+                                {
+                                    keyName = "RightCmd";
+                                    break;
+                                }
+                            case PlatformType.Windows:
+                            default:
+                                {
+                                    keyName = "RightWindows";
+                                    break;
+                                }
+                        }
                         break;
                     }
                 default:
-                    {
-                        buttonName = key.ToString().ToLowerUnderscored();
-                        break;
-                    }
-            }
+                    keyName = key.ToString();
+                    break;
 
-            return "gui/prompts/keyboard/" + buttonName + ".png";
+            }
+            return "Inputs.Keyboard." + keyName;
         }
     }
 }

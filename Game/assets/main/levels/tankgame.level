@@ -57,44 +57,6 @@
                 Z = 61.34793,
             },
         },
-        Tank2 = {
-            Type = "entities/tank_spawn_point.entity",
-            PatrolRoute = {
-                "route2a",
-                "route2b",
-                "route2c",
-                "route2d",
-            },
-            Position = {
-                X = 3.272242,
-                Y = 3.814697E-06,
-                Z = 71.87896,
-            },
-            Rotation = {
-                X = -180,
-                Y = 0,
-                Z = -180,
-            },
-        },
-        Tank1 = {
-            Type = "entities/tank_spawn_point.entity",
-            PatrolRoute = {
-                "route1a",
-                "route1b",
-                "route1c",
-                "route1d",
-            },
-            Position = {
-                X = 9.814082,
-                Y = 0,
-                Z = 78.45951,
-            },
-            Rotation = {
-                X = -5.008956E-06,
-                Y = 90,
-                Z = -5.008956E-06,
-            },
-        },
         {
             Type = "entities/waypoint.entity",
             Position = {
@@ -254,44 +216,6 @@
                 Z = 93.29379,
             },
         },
-        TankU = {
-            Type = "entities/tank_spawn_point.entity",
-            PatrolRoute = {
-                "routeua",
-                "routeub",
-                "routeuc",
-                "routeud",
-            },
-            Position = {
-                X = 4.774927,
-                Y = 9.742843,
-                Z = 10.01932,
-            },
-            Rotation = {
-                X = 180,
-                Y = 90,
-                Z = 180,
-            },
-        },
-        TankU2 = {
-            Type = "entities/tank_spawn_point.entity",
-            PatrolRoute = {
-                "routeuc",
-                "routeud",
-                "routeua",
-                "routeub",
-            },
-            Position = {
-                X = 26.85079,
-                Y = 9.742839,
-                Z = 100.9193,
-            },
-            Rotation = {
-                X = -5.008956E-06,
-                Y = -90,
-                Z = -5.008956E-06,
-            },
-        },
         {
             Type = "entities/waypoint.entity",
             Position = {
@@ -395,65 +319,65 @@
         {
             Type = "entities/weapon_spawn_point.entity",
             Rotation = {
-                X = 180,
+                X = -5.008956E-06,
                 Y = 90,
-                Z = 90,
+                Z = -90,
             },
             Position = {
                 X = 9.887051,
-                Y = 1.573718,
+                Y = 1.557468,
                 Z = 96.76246,
             },
         },
         {
             Type = "entities/weapon_spawn_point.entity",
             Rotation = {
-                X = -180,
+                X = 180,
                 Y = 90,
                 Z = 90,
             },
             Position = {
                 X = 11.37777,
-                Y = 1.642236,
+                Y = 1.559162,
                 Z = 96.55984,
             },
         },
         {
             Type = "entities/weapon_spawn_point.entity",
             Rotation = {
-                X = 180,
+                X = -5.008956E-06,
                 Y = 90,
-                Z = 90,
+                Z = -90,
             },
             Position = {
                 X = 16.34649,
-                Y = 1.639269,
+                Y = 1.556553,
                 Z = 96.64485,
             },
         },
         {
             Type = "entities/weapon_spawn_point.entity",
             Rotation = {
-                X = 180,
+                X = 5.008956E-06,
                 Y = 90,
-                Z = 90,
+                Z = -90,
             },
             Position = {
                 X = 18.12887,
-                Y = 1.640909,
+                Y = 1.55986,
                 Z = 96.4752,
             },
         },
         {
             Type = "entities/weapon_spawn_point.entity",
             Rotation = {
-                X = -180,
+                X = 5.008956E-06,
                 Y = 90,
-                Z = 90,
+                Z = -90,
             },
             Position = {
                 X = 22.84603,
-                Y = 4.856386,
+                Y = 4.812569,
                 Z = 73.83241,
             },
         },
@@ -499,26 +423,26 @@
         {
             Type = "entities/weapon_spawn_point.entity",
             Rotation = {
-                X = 5.008956E-06,
+                X = 180,
                 Y = 90,
-                Z = -90,
+                Z = 90,
             },
             Position = {
                 X = -6.588156,
-                Y = 4.850545,
+                Y = 4.802462,
                 Z = 86.24141,
             },
         },
         {
             Type = "entities/weapon_spawn_point.entity",
             Rotation = {
-                X = 5.008956E-06,
+                X = 180,
                 Y = 90,
-                Z = -90,
+                Z = 90,
             },
             Position = {
                 X = -6.668151,
-                Y = 4.855543,
+                Y = 4.823816,
                 Z = 84.51974,
             },
         },
@@ -544,7 +468,7 @@
             },
             Position = {
                 X = -3.181751,
-                Y = 4.454036,
+                Y = 4.400908,
                 Z = 65.58766,
             },
         },
@@ -590,13 +514,13 @@
         {
             Type = "entities/weapon_spawn_point.entity",
             Rotation = {
-                X = 180,
+                X = -5.008956E-06,
                 Y = 90,
-                Z = 90,
+                Z = -90,
             },
             Position = {
                 X = 35.03397,
-                Y = 4.917698,
+                Y = 4.813219,
                 Z = 43.62704,
             },
         },
@@ -616,14 +540,27 @@
         {
             Type = "entities/weapon_spawn_point.entity",
             Rotation = {
-                X = -5.008956E-06,
+                X = -180,
                 Y = 90,
-                Z = -90,
+                Z = 90,
             },
             Position = {
                 X = 39.18998,
-                Y = 8.106121,
+                Y = 8.058237,
                 Z = 33.08586,
+            },
+        },
+        {
+            Type = "entities/weapon_spawn_point.entity",
+            Rotation = {
+                X = 180,
+                Y = 90,
+                Z = 90,
+            },
+            Position = {
+                X = 11.54071,
+                Y = 8.076982,
+                Z = 51.06329,
             },
         },
         {
@@ -634,21 +571,8 @@
                 Z = 90,
             },
             Position = {
-                X = 11.54071,
-                Y = 8.131845,
-                Z = 51.06329,
-            },
-        },
-        {
-            Type = "entities/weapon_spawn_point.entity",
-            Rotation = {
-                X = 5.008956E-06,
-                Y = 90,
-                Z = -90,
-            },
-            Position = {
                 X = 11.51534,
-                Y = 8.140959,
+                Y = 8.071554,
                 Z = 52.48234,
             },
         },
@@ -876,26 +800,26 @@
         {
             Type = "entities/weapon_spawn_point.entity",
             Rotation = {
-                X = 5.008956E-06,
+                X = -5.008956E-06,
                 Y = 90,
                 Z = -90,
             },
             Position = {
                 X = 37.71072,
-                Y = 1.406878,
+                Y = 1.350669,
                 Z = 84.32274,
             },
         },
         {
             Type = "entities/weapon_spawn_point.entity",
             Rotation = {
-                X = -5.008956E-06,
+                X = -180,
                 Y = 90,
-                Z = -90,
+                Z = 90,
             },
             Position = {
                 X = 37.7603,
-                Y = 1.410111,
+                Y = 1.348774,
                 Z = 87.6386,
             },
         },
@@ -908,7 +832,7 @@
             },
             Position = {
                 X = 37.57881,
-                Y = 1.37762,
+                Y = 1.35294,
                 Z = 85.96606,
             },
         },
@@ -921,21 +845,8 @@
             },
             Position = {
                 X = -8.122065,
-                Y = 11.35362,
+                Y = 11.2933,
                 Z = 49.19505,
-            },
-        },
-        {
-            Type = "entities/weapon_spawn_point.entity",
-            Rotation = {
-                X = -5.008956E-06,
-                Y = 90,
-                Z = -90,
-            },
-            Position = {
-                X = -8.122065,
-                Y = 11.35362,
-                Z = 50.94246,
             },
         },
         {
@@ -946,34 +857,47 @@
                 Z = 90,
             },
             Position = {
+                X = -8.122065,
+                Y = 11.33139,
+                Z = 50.94246,
+            },
+        },
+        {
+            Type = "entities/weapon_spawn_point.entity",
+            Rotation = {
+                X = -180,
+                Y = 90,
+                Z = 90,
+            },
+            Position = {
                 X = -14.54671,
-                Y = 11.35362,
+                Y = 11.33442,
                 Z = 28.95855,
             },
         },
         {
             Type = "entities/weapon_spawn_point.entity",
             Rotation = {
-                X = -5.008956E-06,
+                X = -180,
                 Y = 90,
-                Z = -90,
+                Z = 90,
             },
             Position = {
                 X = -14.54671,
-                Y = 11.35362,
+                Y = 11.32765,
                 Z = 27.52539,
             },
         },
         {
             Type = "entities/weapon_spawn_point.entity",
             Rotation = {
-                X = 5.008956E-06,
+                X = -180,
                 Y = 90,
-                Z = -90,
+                Z = 90,
             },
             Position = {
                 X = -14.54671,
-                Y = 11.35362,
+                Y = 11.33554,
                 Z = 22.54121,
             },
         },
@@ -986,21 +910,8 @@
             },
             Position = {
                 X = -14.54671,
-                Y = 11.35362,
+                Y = 11.31823,
                 Z = 20.87622,
-            },
-        },
-        {
-            Type = "entities/weapon_spawn_point.entity",
-            Rotation = {
-                X = 180,
-                Y = 90,
-                Z = 90,
-            },
-            Position = {
-                X = 57.04184,
-                Y = 11.35409,
-                Z = 41.50044,
             },
         },
         {
@@ -1012,7 +923,20 @@
             },
             Position = {
                 X = 57.04184,
-                Y = 11.43234,
+                Y = 11.31398,
+                Z = 41.50044,
+            },
+        },
+        {
+            Type = "entities/weapon_spawn_point.entity",
+            Rotation = {
+                X = -180,
+                Y = 90,
+                Z = 90,
+            },
+            Position = {
+                X = 57.04184,
+                Y = 11.31354,
                 Z = 39.47557,
             },
         },
@@ -1025,8 +949,21 @@
             },
             Position = {
                 X = 51.99363,
-                Y = 11.43234,
+                Y = 11.30795,
                 Z = 62.39035,
+            },
+        },
+        {
+            Type = "entities/weapon_spawn_point.entity",
+            Rotation = {
+                X = 5.008956E-06,
+                Y = 90,
+                Z = -90,
+            },
+            Position = {
+                X = 51.9891,
+                Y = 11.30935,
+                Z = 64.01317,
             },
         },
         {
@@ -1037,48 +974,111 @@
                 Z = 90,
             },
             Position = {
-                X = 51.9891,
-                Y = 11.43234,
-                Z = 64.01317,
-            },
-        },
-        {
-            Type = "entities/weapon_spawn_point.entity",
-            Rotation = {
-                X = 180,
-                Y = 90,
-                Z = 90,
-            },
-            Position = {
                 X = 52.06522,
-                Y = 11.43234,
+                Y = 11.31187,
                 Z = 85.17461,
             },
         },
         {
             Type = "entities/weapon_spawn_point.entity",
             Rotation = {
-                X = -5.008956E-06,
+                X = 180,
                 Y = 90,
-                Z = -90,
+                Z = 90,
             },
             Position = {
                 X = 52.06726,
-                Y = 11.40493,
+                Y = 11.31635,
                 Z = 83.65224,
             },
         },
         {
             Type = "entities/weapon_spawn_point.entity",
             Rotation = {
-                X = 180,
+                X = -180,
                 Y = 90,
                 Z = 90,
             },
             Position = {
                 X = 56.86166,
-                Y = 11.40493,
+                Y = 11.31426,
                 Z = 102.3017,
+            },
+        },
+        Tank2 = {
+            Type = "entities/tank_spawn_point.entity",
+            PatrolRoute = {
+                "route2a",
+                "route2b",
+                "route2c",
+                "route2d",
+            },
+            Position = {
+                X = 3.272242,
+                Y = 3.814697E-06,
+                Z = 71.87896,
+            },
+            Rotation = {
+                X = -180,
+                Y = 0,
+                Z = -180,
+            },
+        },
+        Tank1 = {
+            Type = "entities/tank_spawn_point.entity",
+            PatrolRoute = {
+                "route1a",
+                "route1b",
+                "route1c",
+                "route1d",
+            },
+            Position = {
+                X = 9.814082,
+                Y = 0,
+                Z = 78.45951,
+            },
+            Rotation = {
+                X = -5.008956E-06,
+                Y = 90,
+                Z = -5.008956E-06,
+            },
+        },
+        TankU = {
+            Type = "entities/tank_spawn_point.entity",
+            PatrolRoute = {
+                "routeua",
+                "routeub",
+                "routeuc",
+                "routeud",
+            },
+            Position = {
+                X = 4.774927,
+                Y = 9.742843,
+                Z = 10.01932,
+            },
+            Rotation = {
+                X = 180,
+                Y = 90,
+                Z = 180,
+            },
+        },
+        TankU2 = {
+            Type = "entities/tank_spawn_point.entity",
+            PatrolRoute = {
+                "routeuc",
+                "routeud",
+                "routeua",
+                "routeub",
+            },
+            Position = {
+                X = 26.85079,
+                Y = 9.742839,
+                Z = 100.9193,
+            },
+            Rotation = {
+                X = -5.008956E-06,
+                Y = -90,
+                Z = -5.008956E-06,
             },
         },
         routealley1 = {

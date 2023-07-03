@@ -15,5 +15,6 @@ namespace Dan200.Core.GUI
         BottomLeft = Bottom | Left,
         BottomRight = Bottom | Right,
         Centre = 0,
+        Stretch = Top | Left | Bottom | Right,
     }
 }

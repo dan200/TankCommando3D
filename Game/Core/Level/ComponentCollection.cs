@@ -250,9 +250,14 @@ namespace Dan200.Core.Level
 
                 public bool MoveNext()
                 {
-                    while(m_idEnumerator.MoveNext())
+                    while (m_idEnumerator.MoveNext())
                     {
-                        if(m_owner.m_components[m_idEnumerator.Current].TryGetValue(m_entityID, out m_current) && !m_current.Dead)
+                        var id = m_idEnumerator.Current;
+                        if (m_owner.m_components[m_idEnumerator.Current].TryGetValue(m_entityID, out m_current) && !m_current.Dead)
+                        {
+                            return true;
+                        }
+                        else if (m_owner.m_newComponents[m_idEnumerator.Current].TryGetValue(m_entityID, out m_current))
                         {
                             return true;
                         }
@@ -442,13 +447,15 @@ namespace Dan200.Core.Level
 
                 public bool MoveNext()
                 {
-                    ComponentBase component;
                     while (m_idEnumerator.MoveNext())
                     {
-                        if (m_owner.m_components[m_idEnumerator.Current].TryGetValue(m_entityID, out component) && !component.Dead)
+                        var id = m_idEnumerator.Current;
+                        if (m_owner.m_components[id].TryGetValue(m_entityID, out m_current) && !m_current.Dead)
                         {
-                            App.Assert(component is TInterface);
-                            m_current = component;
+                            return true;
+                        }
+                        else if (m_owner.m_newComponents[id].TryGetValue(m_entityID, out m_current))
+                        {
                             return true;
                         }
                     }
@@ -520,7 +527,7 @@ namespace Dan200.Core.Level
             App.Assert(!entity.Dead);
             App.Assert(!component.Dead);
             App.Assert(entity.ComponentsMask[id]);
-            App.Assert(!m_components[id].ContainsKey(entity.ID) && !m_newComponents[id].ContainsKey(entity.ID));
+            App.Assert((!m_components[id].ContainsKey(entity.ID) || m_components[id][entity.ID].Dead) && !m_newComponents[id].ContainsKey(entity.ID));
             m_newComponents[id].Add(entity.ID, component);
             m_numNewComponents++;
         }
@@ -633,10 +640,10 @@ namespace Dan200.Core.Level
             return new Components(this, componentID);
         }
 
-        public IEnumerable<ComponentBase> GetNonLiveComponents(int componentID)
+        public IEnumerable<ComponentBase> GetNewComponents(int componentID)
         {
             App.Assert(componentID >= 0 && componentID < m_components.Length);
-            return m_components[componentID].Values;
+            return m_newComponents[componentID].Values;
         }
 
         public Components<TComponent> GetComponents<TComponent>() where TComponent : ComponentBase

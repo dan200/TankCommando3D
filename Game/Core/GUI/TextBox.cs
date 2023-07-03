@@ -7,7 +7,7 @@ using Dan200.Core.Util;
 
 namespace Dan200.Core.GUI
 {
-	internal class TextBox : Element, IAreaHolder
+	internal class TextBox : Element, IAreaProvider
     {
 		private Font m_font;
         private int m_fontSize;
@@ -237,11 +237,11 @@ namespace Dan200.Core.GUI
 				Touch touch;
 				if (Screen.CheckTouchPressed(Screen.Area, out touch))
 				{
-					if (GetSubArea(0).Contains(touch.StartPosition))
+					if (GetSubArea(0).Contains(touch.StartPosition.ToVector2()))
 					{
 						touch.Claim();
 						o_isInsideBox = true;
-						return new TouchPress(Screen, touch, this, 0);
+						return new TouchPress(Screen, touch, this);
 					}
 					else
 					{
@@ -257,7 +257,7 @@ namespace Dan200.Core.GUI
 					if (GetSubArea(0).Contains(Screen.MousePosition))
 					{
 						o_isInsideBox = true;
-                        return new MousePress(Screen, mouse, MouseButton.Left, this, 0);
+                        return new MousePress(Screen, mouse, MouseButton.Left, this);
 					}
 					else
 					{

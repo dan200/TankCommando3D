@@ -27,6 +27,7 @@ namespace Dan200.Game.Game
     internal abstract class LevelState : GameState
     {
         private Core.Level.Level m_level;
+        private Entity m_rootEntity;
 		private LevelRenderer m_levelRenderer;
         private ICameraProvider m_cameraProvider;
 
@@ -35,6 +36,14 @@ namespace Dan200.Game.Game
             get
             {
                 return m_level;
+            }
+        }
+
+        public Entity RootEntity
+        {
+            get
+            {
+                return m_rootEntity;
             }
         }
 
@@ -69,11 +78,11 @@ namespace Dan200.Game.Game
 			}
 		}
 
-        protected void SetupEntityCreationInfoForEditor(EntityPrefab prefab, LuaTable properties, List<EntityCreationInfo> o_infos)
+        protected void SetupEntityCreationInfoForEditor(EntityPrefab prefab, LuaTable properties, List<EntityCreationInfo> o_infos, bool makeEditable, int rootParentID=0)
         {
             // Setup the info normally
             int firstInfoIndex = o_infos.Count;
-            prefab.SetupCreationInfo(Level, properties, o_infos);
+            prefab.SetupCreationInfo(Level, properties, o_infos, rootParentID);
             int count = o_infos.Count - firstInfoIndex;
             App.Assert(count > 0);
 
@@ -89,23 +98,18 @@ namespace Dan200.Game.Game
                 }
                 o_infos[i] = info;
             }
-            
-            // Add editor components to the root
-            var editorComponentID = ComponentRegistry.GetComponentID<EditorComponent>();
-            var transformComponentID = ComponentRegistry.GetComponentID<TransformComponent>();
-            var manipulatorComponentID = ComponentRegistry.GetComponentID<ManipulatorComponent>();
 
-            var firstInfo = o_infos[firstInfoIndex];
-            var editorComponentProperties = new LuaTable(2);
-            editorComponentProperties["Prefab"] = prefab.Path;
-            editorComponentProperties["Properties"] = properties;
-            firstInfo.AddComponent(editorComponentID, editorComponentProperties);
-            if (firstInfo.Components[transformComponentID])
+            if (makeEditable)
             {
-                var manipulatorComponentProperties = new LuaTable(0);
-                firstInfo.AddComponent(manipulatorComponentID, manipulatorComponentProperties);
+                // Add editor component to the root
+                var editorComponentID = ComponentRegistry.GetComponentID<EditorComponent>();
+                var firstInfo = o_infos[firstInfoIndex];
+                var editorComponentProperties = new LuaTable(2);
+                editorComponentProperties["Prefab"] = prefab.Path;
+                editorComponentProperties["Properties"] = properties;
+                firstInfo.AddComponent(editorComponentID, editorComponentProperties);
+                o_infos[firstInfoIndex] = firstInfo;
             }
-            o_infos[firstInfoIndex] = firstInfo;
         }
 
         public LevelState(Game game, string levelPath, LevelLoadFlags flags) : base(game)
@@ -117,28 +121,43 @@ namespace Dan200.Game.Game
 			m_level.Data = data;
 			m_level.InEditor = (flags & LevelLoadFlags.Editor) != 0;
 
-			// Add systems
+            // Add systems
             AddSystems(m_level, null);
 
-            // Setup entity info from the level data
+            // Setup entity info for the root
             var infos = new List<EntityCreationInfo>();
+            var rootPrefab = EntityPrefab.Get("entities/level.entity");
+            if (m_level.InEditor)
+            {
+                SetupEntityCreationInfoForEditor(rootPrefab, LuaTable.Empty, infos, false);
+            }
+            else
+            {
+                rootPrefab.SetupCreationInfo(m_level, LuaTable.Empty, infos);
+            }
+
+            // Setup entity info from the level data
+            var rootID = infos[0].ID;
             foreach (var entityData in data.Entities)
 			{
                 var prefab = EntityPrefab.Get(entityData.Type);
                 var properties = entityData.Properties;
+                var firstInfoIdx = infos.Count;
                 if (m_level.InEditor)
                 {
-                    SetupEntityCreationInfoForEditor(prefab, properties, infos);
+                    SetupEntityCreationInfoForEditor(prefab, properties, infos, true, rootID);
                 }
                 else
                 {
-                    prefab.SetupCreationInfo(m_level, properties, infos);
+                    prefab.SetupCreationInfo(m_level, properties, infos, rootID);
                 }
             }
 
             // Create the entities
             m_level.Entities.Create(infos);
-            m_level.MakeNewComponentsLive();
+            m_level.PromoteNewComponents();
+            m_rootEntity = m_level.Entities.Lookup(rootID);
+            App.Assert(m_rootEntity != null);
 
             // Create everything else
             m_levelRenderer = new LevelRenderer(game.Window.Renderer, m_level);
@@ -162,7 +181,6 @@ namespace Dan200.Game.Game
             level.AddSystem(new GUISystem(Game.Screen, Game.MainView.Camera), save);
             level.AddSystem(new LightingSystem(), save);
             level.AddSystem(new NameSystem(), save);
-            level.AddSystem(new PhysicsSystem(), save);
 
             var script = level.AddSystem(new ScriptSystem(), save);
             script.AddAPI(new DevAPI(this));
@@ -189,7 +207,7 @@ namespace Dan200.Game.Game
             // Choose the sky
             if (m_level.Data.SkyPath != null)
             {
-                Game.Sky = new SkyInstance(Sky.Get(m_level.Data.SkyPath));
+                Game.Sky = Sky.Get(m_level.Data.SkyPath);
             }
             else
             {
@@ -265,7 +283,7 @@ namespace Dan200.Game.Game
         private void CommonUpdate(float dt)
         {
             // Update level(s)
-            m_level.MakeNewComponentsLive();
+            m_level.PromoteNewComponents();
             m_level.Update(dt, Game.ThreadPool.WorkerTasks);
 			m_level.DebugDraw(DebugDrawSystems, DebugDrawComponents);
         }

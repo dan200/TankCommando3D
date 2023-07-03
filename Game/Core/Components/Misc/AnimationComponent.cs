@@ -2,6 +2,7 @@
 using Dan200.Core.Animation;
 using Dan200.Core.Components.Render;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Level;
 using Dan200.Core.Lua;
 using Dan200.Core.Render;

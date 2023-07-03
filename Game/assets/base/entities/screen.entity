@@ -1,0 +1,11 @@
+﻿-- Entity data
+{
+	Components = {
+		Hierarchy = {},
+		GUIScreen = {},
+		GUIElement = {
+			Anchor = "Stretch",
+		},
+		Input = {},
+	},
+}

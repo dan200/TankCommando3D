@@ -38,10 +38,10 @@ namespace Dan200.Core.Components.Render
         protected override void OnInit(in ModelComponentData properties)
         {
             m_transform = Entity.GetComponent<TransformComponent>();
-            ReInit(properties);
+            Reset(properties);
         }
 
-        protected override void ReInit(in ModelComponentData properties)
+        protected override void Reset(in ModelComponentData properties)
         {
             var model = Model.Get(properties.Model);
             m_modelInstance = new ModelInstance(model, m_transform.Transform);

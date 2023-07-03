@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Dan200.Core.Util;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Main;
 using Dan200.Core.Render;
 using Dan200.Core.Math;
@@ -14,6 +15,7 @@ using Dan200.Core.Systems;
 using Dan200.Core.Geometry;
 using Dan200.Core.Physics;
 using Dan200.Game.GUI;
+using Dan200.Core.Components.Physics;
 
 namespace Dan200.Game.Components.Player
 {
@@ -23,12 +25,12 @@ namespace Dan200.Game.Components.Player
         public float ConfirmTime;
     }
 
-    [RequireSystem(typeof(PhysicsSystem))]
+    [RequireComponentOnAncestor(typeof(PhysicsWorldComponent))]
     [RequireComponent(typeof(PlayerMovementComponent))]
     [RequireComponent(typeof(PlayerSettingsComponent))]
     internal class PlayerTrackerComponent : Component<PlayerTrackerComponentData>, IUpdate, IDebugDraw
     {
-        private PhysicsSystem m_physics;
+        private PhysicsWorldComponent m_physics;
         private PlayerMovementComponent m_movement;
         private PlayerSettingsComponent m_settings;
         private PlayerTrackerComponentData m_properties;
@@ -38,7 +40,7 @@ namespace Dan200.Game.Components.Player
 
         protected override void OnInit(in PlayerTrackerComponentData properties)
         {
-            m_physics = Level.GetSystem<PhysicsSystem>();
+            m_physics = Entity.GetComponentOnAncestor<PhysicsWorldComponent>();
             m_movement = Entity.GetComponent<PlayerMovementComponent>();
             m_settings = Entity.GetComponent<PlayerSettingsComponent>();
             m_properties = properties;

@@ -1,6 +1,7 @@
 ﻿using System;
 using Dan200.Core.Animation;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Level;
 using Dan200.Core.Lua;
 using Dan200.Core.Render;
@@ -17,6 +18,7 @@ namespace Dan200.Core.Components.Audio
     internal struct AudioEmmitterComponentData
     {
         [Range(Min = 0.0f)]
+        [Optional(Default = 0.0f)]
         public float MinRange;
 
         [Range(Min = 0.0f)]

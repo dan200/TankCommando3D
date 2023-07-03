@@ -46,6 +46,13 @@
 				"ai.namegen.second",
 			},
 		},
+		AudioEmitter = {
+			--MinRange = 5.0,
+			MaxRange = 25.0,
+		},
+		Synth = {
+			Channels = 1,
+		},
 	},
 	Children = {
 		Trackable = {
@@ -82,12 +89,18 @@
 					TurnRate = 60,
 					GunPath = ".",
 				},
+				Ammo = {
+					ClipSize = 1000,
+					Infinite = true,
+				},
+				Weapon = {
+					CanBePickedUp = false,
+				},
 				Gun = {
 					Projectile = "entities/shell.entity",
 					Spread = 4,
 					AutomaticFireRate = 8,
 					ManualFireRate = 8,
-					ClipSize = 1000,
 					ProjectilesPerShot = 1,
 				},
 				Physics = {

@@ -44,7 +44,7 @@ namespace Dan200.Game.Game
             m_backdrop.Anchor = Anchor.Top | Anchor.Left | Anchor.Bottom | Anchor.Right;
             m_backdrop.LocalPosition = Vector2.Zero;
 
-			m_text = new Label(LowResUI.NumbersFont, 64, "H0", Colour.White, TextAlignment.Center, game.Screen.Width);
+            m_text = new Label(LowResUI.NumbersFont, LowResUI.NumbersFontSize, "H0", Colour.White, TextAlignment.Center, game.Screen.Width);
 			m_text.Anchor = Anchor.Left | Anchor.Right;
             m_text.LocalPosition = new Vector2(0.0f, -0.5f * m_text.Height);
 

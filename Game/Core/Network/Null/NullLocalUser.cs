@@ -38,7 +38,7 @@ namespace Dan200.Core.Network.Builtin
         {
         }
 
-        public void IndicateAchievementProgress(Achievement achievement, int currentValue, int unlockValue)
+        public void UpdateAchievementProgress(Achievement achievement, int currentValue, int unlockValue, bool notify)
         {
         }
 

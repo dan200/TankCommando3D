@@ -1,6 +1,7 @@
 ﻿using Dan200.Core.Components;
 using Dan200.Core.Components.Core;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Level;
 using Dan200.Core.Lua;
 using Dan200.Core.Main;
@@ -79,7 +80,7 @@ namespace Dan200.Game.Components.Player
             var properties = new LuaTable();
             properties["Position"] = m_transform.Position.ToLuaValue();
             properties["Rotation"] = (m_transform.Transform.GetRotationAngles() * Mathf.RADIANS_TO_DEGREES).ToLuaValue();
-            m_spawnedObject = prefab.Instantiate(Level, properties);
+            m_spawnedObject = prefab.Instantiate(Level, properties, 1); // TODO
         }
     }
 }

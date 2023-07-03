@@ -12,10 +12,9 @@ namespace Dan200.Core.Platform
 	}
 
 	internal interface IPlatform
-	{
-		bool SupportsMultipleWindows { get; }
-		
-		PlatformID PlatformID { get; }
+	{		
+        bool Headless { get; }
+		PlatformType Type { get; }
 		INetwork Network { get; }
 		string SystemLanguage { get; }
 
@@ -29,7 +28,24 @@ namespace Dan200.Core.Platform
 
 	internal static class PlatformExtensions
 	{
-		public static void OpenTwitter(this IPlatform platform, string handle)
+        public static bool IsDesktop(this IPlatform platform)
+        {
+            return !platform.IsMobile();
+        }
+
+        public static bool IsMobile(this IPlatform platform)
+        {
+            switch(platform.Type)
+            {
+                case PlatformType.Android:
+                case PlatformType.IOS:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static void OpenTwitter(this IPlatform platform, string handle)
 		{
 			platform.OpenWebBrowser(
 				string.Format("http://www.twitter.com/{0}", handle.URLEncode()),

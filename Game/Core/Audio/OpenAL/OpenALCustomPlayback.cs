@@ -183,6 +183,7 @@ namespace Dan200.Core.Audio.OpenAL
 
             // Start the background thread
             var thread = new Thread(Run);
+            thread.Name = "OpenALCustomback";
             thread.Start();
         }
 
@@ -224,7 +225,7 @@ namespace Dan200.Core.Audio.OpenAL
 
                 // Start reading
                 int nextBufferIndex = 0;
-                int bufferLength = (BUFFER_DURATION_MILLIS * sampleRate) / 1000;
+                int bufferLength = System.Math.Max((BUFFER_DURATION_MILLIS * sampleRate) / 1000, 1);
                 var buffer = new AudioBuffer(bufferLength, channels, sampleRate);
 
                 // Loop until the we stop
@@ -370,7 +371,7 @@ namespace Dan200.Core.Audio.OpenAL
         {
             if (!m_stopped)
             {
-                AL.Source(m_source, ALSourcef.RolloffFactor, 4.0f);
+                AL.Source(m_source, ALSourcef.RolloffFactor, 1.0f);
                 AL.Source(m_source, ALSourcef.ReferenceDistance, m_minRange);
                 AL.Source(m_source, ALSourcef.MaxDistance, m_maxRange);
                 ALUtils.CheckError();

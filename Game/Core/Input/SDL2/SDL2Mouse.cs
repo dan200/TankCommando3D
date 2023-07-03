@@ -109,10 +109,10 @@ namespace Dan200.Core.Input.SDL2
             {
                 m_buttons.Add(button, new Input(button.ToString(), button.GetPrompt()));
             }
-            m_wheelUp = new Input("WheelUp", "[gui/prompts/mouse/scroll_wheel.png]");
-            m_wheelDown = new Input("WheelDown", "[gui/prompts/mouse/scroll_wheel.png]");
-            m_wheelLeft = new Input("WheelLeft", "[gui/prompts/mouse/scroll_wheel.png]");
-            m_wheelRight = new Input("WheelRight", "[gui/prompts/mouse/scroll_wheel.png]");
+            m_wheelUp = new Input("WheelUp", MouseWheelDirection.Up.GetPrompt());
+            m_wheelDown = new Input("WheelDown", MouseWheelDirection.Down.GetPrompt());
+            m_wheelLeft = new Input("WheelLeft", MouseWheelDirection.Left.GetPrompt());
+            m_wheelRight = new Input("WheelRight", MouseWheelDirection.Right.GetPrompt());
             m_locked = false;
             m_showCursor = true;
             Update();

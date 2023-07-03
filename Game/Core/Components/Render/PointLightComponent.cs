@@ -1,6 +1,7 @@
 ﻿using System;
 using Dan200.Core.Components.Core;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Level;
 using Dan200.Core.Lua;
 using Dan200.Core.Render;
@@ -35,7 +36,7 @@ namespace Dan200.Core.Components.Render
             AddLight(properties);
         }
 
-        protected override void ReInit(in PointLightComponentData properties)
+        protected override void Reset(in PointLightComponentData properties)
         {
             RemoveLight();
             AddLight(properties);

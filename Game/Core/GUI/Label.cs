@@ -1,48 +1,12 @@
 
 using System.Globalization;
 using Dan200.Core.Assets;
+using Dan200.Core.Components.GUI;
 using Dan200.Core.Math;
 using Dan200.Core.Render;
 
 namespace Dan200.Core.GUI
 {
-    internal enum TextAlignment
-    {
-        Left,
-        Center,
-        Right
-    }
-
-    internal enum TextStyle
-    {
-        Default,
-        UpperCase,
-        LowerCase,
-    }
-
-    internal static class TextStyleExtensions
-    {
-        public static string Apply(this TextStyle style, string text, Language language)
-        {
-			var culture = (language != null) ? language.Culture : CultureInfo.InvariantCulture;
-            switch (style)
-            {
-                case TextStyle.UpperCase:
-                    {
-						return text.ToUpper(culture);
-                    }
-                case TextStyle.LowerCase:
-                    {
-                        return text.ToLower(culture);
-                    }
-                default:
-                    {
-                        return text;
-                    }
-            }
-        }
-    }
-
     internal class Label : Element
     {
         private Font m_font;
@@ -239,9 +203,29 @@ namespace Dan200.Core.GUI
         {
         }
 
-		protected override void OnRebuild(GUIBuilder builder)
+        private string ApplyTextStyle(string text, TextStyle style, Language language)
         {
-            var styledString = m_style.Apply(m_text, Screen.Language);
+            var culture = (language != null) ? language.Culture : CultureInfo.InvariantCulture;
+            switch (style)
+            {
+                case TextStyle.UpperCase:
+                    {
+                        return text.ToUpper(culture);
+                    }
+                case TextStyle.LowerCase:
+                    {
+                        return text.ToLower(culture);
+                    }
+                default:
+                    {
+                        return text;
+                    }
+            }
+        }
+       
+         protected override void OnRebuild(GUIBuilder builder)
+        {
+            var styledString = ApplyTextStyle(m_text, m_style, Screen.Language);
 			var position = Position;
 			var width = Width;
 			switch (m_alignment)
@@ -261,7 +245,7 @@ namespace Dan200.Core.GUI
 
 		private Vector2 Measure()
 		{
-			var styledString = m_style.Apply(m_text, (Screen != null) ? Screen.Language : null);
+			var styledString = ApplyTextStyle(m_text, m_style, (Screen != null) ? Screen.Language : null);
 			return m_font.Measure(styledString, m_fontSize, m_parseImages);
 		}
     }

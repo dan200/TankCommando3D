@@ -27,25 +27,7 @@ namespace Dan200.Core.Input
     {
         public static string GetPrompt(this MouseButton button)
         {
-            var path = button.GetPromptPath();
-            if (path != null)
-            {
-                return '[' + button.GetPromptPath() + ']';
-            }
-            else
-            {
-                return button.ToString();
-            }
-        }
-
-        public static string GetPromptPath(this MouseButton button)
-        {
-            if (button >= MouseButton.Left && button <= MouseButton.Right)
-            {
-                var buttonName = button.ToString().ToLowerUnderscored();
-                return "gui/prompts/mouse/" + buttonName + ".png";
-            }
-            return null;
+            return "Inputs.Mouse." + button;
         }
     }
 }

@@ -7,6 +7,7 @@ using Dan200.Core.Physics;
 using Dan200.Core.Lua;
 using Dan200.Core.Input;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 
 namespace Dan200.Core.Components.Misc
 {

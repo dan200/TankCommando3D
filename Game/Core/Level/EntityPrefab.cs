@@ -206,6 +206,7 @@ namespace Dan200.Core.Level
         {
             // Parse the LON
             var decoder = new LONDecoder(stream);
+            decoder.AddMacro("Vector2", LONMacros.Vector2);
             decoder.AddMacro("Vector3", LONMacros.Vector3);
             decoder.AddMacro("Colour", LONMacros.Colour);
             decoder.AddMacro("Property", LONMacros.Property);
@@ -529,7 +530,7 @@ namespace Dan200.Core.Level
             }
         }
 
-        public void SetupCreationInfo(Level level, LuaTable properties, List<EntityCreationInfo> o_infos)
+        public void SetupCreationInfo(Level level, LuaTable properties, List<EntityCreationInfo> o_infos, int rootParentID=0)
         {
             // Collapse the prefab
             Merge();
@@ -538,10 +539,10 @@ namespace Dan200.Core.Level
             int rootID = level.Entities.AssignIDs(m_mergedEntities.Count);
 
             // Setup the creation info
-            SetupCreationInfo(rootID, properties, o_infos);
+            SetupCreationInfo(rootID, properties, o_infos, rootParentID);
         }
 
-        public void SetupCreationInfo(int rootEntityID, LuaTable properties, List<EntityCreationInfo> o_infos)
+        public void SetupCreationInfo(int rootEntityID, LuaTable properties, List<EntityCreationInfo> o_infos, int rootParentID=0)
         {
             // Collapse the prefab
             Merge();
@@ -551,11 +552,17 @@ namespace Dan200.Core.Level
             var name = properties.GetOptionalString("Name", null);
             if (name != null && !m_mergedEntities[0].Components[nameID])
             {
-                throw new Exception("Attempt to name an entity " + name + " but prefab " + m_path + " does not have a name component");
+                throw new Exception("Attempt to name an entity " + name + " but prefab " + m_path + " does not have a Name component");
+            }
+
+            // Check the name hierarchy exists if we want to set a name
+            var hierarchyID = ComponentRegistry.GetComponentID<HierarchyComponent>();
+            if (rootParentID != 0 && !m_mergedEntities[0].Components[hierarchyID])
+            {
+                throw new Exception("Attempt to set a parent on an entity but prefab " + m_path + " does not have a Hierarchy component");
             }
 
             // Setup the entity infos
-            var hierarchyID = ComponentRegistry.GetComponentID<HierarchyComponent>();
             for (int i = 0; i < m_mergedEntities.Count; ++i)
             {
                 var data = m_mergedEntities[i];
@@ -582,6 +589,10 @@ namespace Dan200.Core.Level
                             App.Assert(data.Parent >= 0 && data.Parent < m_mergedEntities.Count);
                             var parentID = rootEntityID + data.Parent;
                             modifiedProperties["Parent"] = parentID;
+                        }
+                        else if (rootParentID != 0)
+                        {
+                            modifiedProperties["Parent"] = rootParentID;
                         }
                         else
                         {
@@ -610,7 +621,7 @@ namespace Dan200.Core.Level
             }
         }
 
-        public Entity Instantiate(Level level, LuaTable properties)
+        public Entity Instantiate(Level level, LuaTable properties, int rootParentID=0)
         {
             // Setup the entity info
             List<EntityCreationInfo> creationInfo;
@@ -627,7 +638,7 @@ namespace Dan200.Core.Level
                 m_creationInfo.Clear();
                 creationInfo = m_creationInfo;
             }
-            SetupCreationInfo(level, properties, creationInfo);
+            SetupCreationInfo(level, properties, creationInfo, rootParentID);
 
             // Create the entities
             m_creationsInProgress++;

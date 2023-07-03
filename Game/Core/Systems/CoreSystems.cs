@@ -11,7 +11,6 @@ namespace Dan200.Core.Systems
             ComponentRegistry.RegisterSystem<GUISystem>("GUI");
             ComponentRegistry.RegisterSystem<LightingSystem>("Lighting");
             ComponentRegistry.RegisterSystem<NameSystem>("Name");
-            ComponentRegistry.RegisterSystem<PhysicsSystem>("Physics");
             ComponentRegistry.RegisterSystem<ScriptSystem>("Script");
         }
     }

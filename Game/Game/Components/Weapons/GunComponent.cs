@@ -1,6 +1,7 @@
 ﻿using Dan200.Core.Components.Core;
 using Dan200.Core.Components.Physics;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Level;
 using Dan200.Core.Lua;
 using Dan200.Core.Main;
@@ -41,9 +42,6 @@ namespace Dan200.Game.Components.Weapons
         public float Recoil;
 
         [Range(Min = 0)]
-        public int ClipSize;
-
-        [Range(Min = 0)]
         [Optional(Default = 1)]
         public int ProjectilesPerShot;
 
@@ -63,18 +61,21 @@ namespace Dan200.Game.Components.Weapons
     [RequireSystem(typeof(NameSystem))]
     [RequireSystem(typeof(NoiseSystem))]
     [RequireComponent(typeof(TransformComponent))]
+    [RequireComponent(typeof(WeaponComponent))]
+    [RequireComponent(typeof(AmmoComponent))]
     [AfterComponent(typeof(NameComponent))]
     [AfterComponent(typeof(PhysicsComponent))]
-    internal class GunComponent : Component<GunComponentData>, IInteractable, IUpdate
+    internal class GunComponent : Component<GunComponentData>, IUpdate, IDamagePropagator
     {
         private NoiseSystem m_noise;
         private TransformComponent m_transform;
         private TransformComponent m_barrelTransform;
         private TransformComponent m_muzzleFlashTransform;
         private PhysicsComponent m_physics;
+        private AmmoComponent m_ammo;
+        private GunComponentData m_properties;
 
         private EntityPrefab m_projectilePrefab;
-        private GunComponentData m_properties;
 
         private bool m_triggerHeld;
         private Vector3? m_targetPos;
@@ -82,7 +83,6 @@ namespace Dan200.Game.Components.Weapons
 
         private float m_muzzleFlashTimer; // Time until muzzle flash dissapears
         private float m_fireTimer; // Time until firing is allowed again 
-        private int m_ammoInClip;
 
         public event StructEventHandler<GunComponent> OnFired;
 
@@ -116,14 +116,6 @@ namespace Dan200.Game.Components.Weapons
             set;
         }
 
-        public int AmmoInClip
-        {
-            get
-            {
-                return m_ammoInClip;
-            }
-        }
-
         public GunComponentData Properties
         {
             get
@@ -139,7 +131,8 @@ namespace Dan200.Game.Components.Weapons
             m_barrelTransform = Level.GetSystem<NameSystem>().Lookup("./Barrel", Entity).GetComponent<TransformComponent>();
             m_muzzleFlashTransform = Level.GetSystem<NameSystem>().Lookup("./Barrel/MuzzleFlash", Entity).GetComponent<TransformComponent>();
             m_physics = Entity.GetComponent<PhysicsComponent>();
-            if(m_physics != null)
+            m_ammo = Entity.GetComponent<AmmoComponent>();
+            if (m_physics != null)
             {
                 m_physics.OnCollisionStart += OnCollisionStart;
             }
@@ -154,7 +147,14 @@ namespace Dan200.Game.Components.Weapons
             m_muzzleFlashTransform.Entity.Visible = false;
             m_muzzleFlashTimer = -1.0f;
             m_fireTimer = -1.0f;
-            m_ammoInClip = properties.ClipSize;
+        }
+
+        protected override void OnShutdown()
+        {
+            if (m_physics != null)
+            {
+                m_physics.OnCollisionStart -= OnCollisionStart;
+            }
         }
 
         private void OnCollisionStart(PhysicsComponent sender, CollisionStartEventArgs args)
@@ -169,13 +169,9 @@ namespace Dan200.Game.Components.Weapons
             }
         }
 
-        protected override void OnShutdown()
-        {
-        }
-
         private void Fire()
         {
-            App.Assert(m_ammoInClip > 0);
+            App.Assert(m_ammo.AmmoInClip > 0);
 
             // Calculate base transform
             var barrelTransform = m_barrelTransform.Transform;
@@ -185,8 +181,10 @@ namespace Dan200.Game.Components.Weapons
                 barrelTransform.Rotation = Matrix3.CreateLook(direction, barrelTransform.Up);
             }
 
+            // Consume the ammo
+            int numShots = m_ammo.ConsumeAmmo(m_properties.ProjectilesPerShot);
+
             // For each shot:
-            int numShots = Math.Min(m_properties.ProjectilesPerShot, m_ammoInClip);
             for (int i = 0; i < m_properties.ProjectilesPerShot; ++i)
             {
                 // Calculate projectile transform
@@ -199,18 +197,14 @@ namespace Dan200.Game.Components.Weapons
                 var properties = new LuaTable();
                 properties["Position"] = projectileTransform.Position.ToLuaValue();
                 properties["Rotation"] = (projectileTransform.Rotation.GetRotationAngles() * Mathf.RADIANS_TO_DEGREES).ToLuaValue();
-                var projectile = m_projectilePrefab.Instantiate(Level, properties);
+                var projectile = m_projectilePrefab.Instantiate(Level, properties, 1); // TODO
 
-                // Propogate the damage origin
-                var projectileComponent = projectile.GetComponent<ProjectileComponent>();
-                if(projectileComponent != null)
+                // Propogate damage origin
+                foreach (var propagator in projectile.GetComponentsWithInterface<IDamagePropagator>())
                 {
-                    projectileComponent.DamageOrigin = DamageOrigin;
+                    propagator.DamageOrigin = DamageOrigin;
                 }
             }
-
-            // Deplete the ammo
-            m_ammoInClip -= numShots;
 
             // Flash the muzzle
             m_muzzleFlashTransform.Entity.Visible = true;
@@ -230,37 +224,14 @@ namespace Dan200.Game.Components.Weapons
             // Inform listeners
             FireOnFired();
         }
-
-        public bool CanInteract(Entity player, Interaction interaction)
-        {
-            if (interaction == Interaction.UseOnce)
-            {
-                var playerWeapon = player.GetComponent<PlayerWeaponHolderComponent>();
-                if (playerWeapon != null)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public bool Interact(Entity player, Interaction interaction)
-        {
-            if(CanInteract(player, interaction))
-            {
-                player.GetComponent<PlayerWeaponHolderComponent>().TakeWeapon(Entity);
-                return true;
-            }
-            return false;
-        }
-
+        
         public void Update(float dt)
         {
             // Update firing
             m_fireTimer -= dt;
             if (m_triggerHeld || m_misfire)
             {
-                if(m_fireTimer < 0.0f && m_ammoInClip > 0)
+                if(m_fireTimer < 0.0f && m_ammo.AmmoInClip > 0)
                 {
                     Fire();
                     if(m_properties.AutomaticFireRate > 0.0f)

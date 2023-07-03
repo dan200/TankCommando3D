@@ -17,12 +17,15 @@
 			Model = "models/gun.obj",
 			CollisionGroup = "Prop",
 		},
+		Ammo = {
+			ClipSize = 16,
+		},
+		Weapon = {},
 		Gun = {
 			Projectile = "entities/bullet.entity",
-			Spread = 2,
+			Spread = 1,
 			AutomaticFireRate = 8.0,
 			ManualFireRate = 10.0,
-			ClipSize = 24,
 			ProjectilesPerShot = 1,
 
 			Recoil = 1.0,

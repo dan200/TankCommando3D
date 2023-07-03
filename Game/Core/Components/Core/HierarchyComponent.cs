@@ -10,6 +10,7 @@ using Dan200.Core.Main;
 using Dan200.Core.Render;
 using Dan200.Core.Serialisation;
 using Dan200.Core.Util;
+using Dan200.Core.Interfaces.Core;
 
 namespace Dan200.Core.Components.Core
 {
@@ -31,17 +32,18 @@ namespace Dan200.Core.Components.Core
 			return null;
 		}
 		
-		internal struct ChildCollection : IReadOnlyCollection<Entity>
+		internal struct ChildCollection : IEnumerable<Entity>
 		{
 			internal struct Enumerator : IEnumerator<Entity>
 			{
-				private List<HierarchyComponent>.Enumerator m_enumerator;
+                private HierarchyComponent m_root;
+                private HierarchyComponent m_current;
 
 				public Entity Current
 				{
 					get
 					{
-						return m_enumerator.Current.Entity;
+                        return m_current.Entity;
 					}
 				}
 
@@ -55,7 +57,9 @@ namespace Dan200.Core.Components.Core
 
 				internal Enumerator(HierarchyComponent owner)
 				{
-					m_enumerator = owner.m_children.GetEnumerator();
+                    App.Assert(owner != null);
+                    m_root = owner;
+                    m_current = null;
 				}
 
 				public void Dispose()
@@ -64,7 +68,15 @@ namespace Dan200.Core.Components.Core
 
 				public bool MoveNext()
 				{
-					return m_enumerator.MoveNext();
+                    if(m_current == null)
+                    {
+                        m_current = m_root.m_firstChild;
+                    }
+                    else
+                    {
+                        m_current = m_current.m_nextSibling;
+                    }
+                    return m_current != null;
 				}
 
 				public void Reset()
@@ -74,14 +86,6 @@ namespace Dan200.Core.Components.Core
 			}
 
 			private HierarchyComponent m_owner;
-
-			public int Count
-			{
-				get
-				{
-					return m_owner.m_children.Count;
-				}
-			}
 
 			public ChildCollection(HierarchyComponent owner)
 			{
@@ -304,7 +308,6 @@ namespace Dan200.Core.Components.Core
 			{
 				private HierarchyComponent m_root;
 				private HierarchyComponent m_current;
-				private List<HierarchyComponent>.Enumerator m_enumerator;
 
 				public Entity Current
 				{
@@ -324,9 +327,9 @@ namespace Dan200.Core.Components.Core
 
 				internal Enumerator(HierarchyComponent owner, bool includeSelf)
 				{
+                    App.Assert(owner != null);
 					m_root = owner;
 					m_current = includeSelf ? null : owner;
-					m_enumerator = owner.m_children.GetEnumerator();
 				}
 
 				public void Dispose()
@@ -335,67 +338,30 @@ namespace Dan200.Core.Components.Core
 
 				public bool MoveNext()
 				{
-					// Handle first iterations
+					// Begin with the root
 					if (m_current == null)
 					{
 						m_current = m_root;
 						return true;
 					}
-					else if (m_current == m_root)
-					{
-						if (m_enumerator.MoveNext())
-						{
-							m_current = m_enumerator.Current;
-							return true;
-						}
-						else
-						{
-							return false;
-						}
-					}
 
-					// If there are children, descend into them
-					if (m_current.m_children.Count > 0)
-					{
-						m_enumerator = m_current.m_children.GetEnumerator();
-						m_enumerator.MoveNext();
-						m_current = m_enumerator.Current;
-						return true;
-					}
+                    // Then descend into the children
+                    if(m_current.m_firstChild != null)
+                    {
+                        m_current = m_current.m_firstChild;
+                        return true;
+                    }
 
-					// Else, move to the next sibling
-					if (m_enumerator.MoveNext())
-					{
-						m_current = m_enumerator.Current;
-						return true;
-					}
-
-					// Else, move up the hierarchy
-					var parent = m_current.m_parent;
-					while (parent != m_root)
-					{
-						App.Assert(parent != null);
-						App.Assert(parent.m_parent != null);
-						App.Assert(parent.m_parent.m_children.Contains(parent));
-						var Enumerator = parent.m_parent.m_children.GetEnumerator();
-						while (Enumerator.MoveNext())
-						{
-							if (Enumerator.Current == parent)
-							{
-								m_enumerator = Enumerator;
-								if (m_enumerator.MoveNext())
-								{
-									m_current = m_enumerator.Current;
-									return true;
-								}
-								else
-								{
-									break;
-								}
-							}
-						}
-						parent = parent.m_parent;
-					}
+                    // Then visit siblings, or parent's siblings
+                    while(m_current != m_root)
+                    {
+                        if(m_current.m_nextSibling != null)
+                        {
+                            m_current = m_current.m_nextSibling;
+                            return true;
+                        }
+                        m_current = m_current.m_parent;
+                    }
 
 					// Reached the end
 					return false;
@@ -909,9 +875,11 @@ namespace Dan200.Core.Components.Core
 		}
 
 		private HierarchyComponent m_parent;
-		private List<HierarchyComponent> m_children;
+        private HierarchyComponent m_firstChild;
+        private HierarchyComponent m_nextSibling;
+        private HierarchyComponent m_previousSibling;
 
-		public Entity Parent
+        public Entity Parent
 		{
 			get
 			{
@@ -931,73 +899,20 @@ namespace Dan200.Core.Components.Core
 					parent = null;
 				}
 
-				if (m_parent != parent)
+                var oldParent = m_parent;
+                if (oldParent != parent)
 				{
-					// Get current ancestors before we break the link with the parent
-					List<IDescendantListener> oldAncestorDescendantListeners = null;
-					if(m_parent != null)
-					{
-						var Enumerator = GetAncestorsWithInterface<IDescendantListener>().GetEnumerator();
-						if (Enumerator.MoveNext())
-						{
-							oldAncestorDescendantListeners = new List<IDescendantListener>();
-							do
-							{
-								oldAncestorDescendantListeners.Add(Enumerator.Current);
-							}
-							while (Enumerator.MoveNext());
-						}
-					}
+                    // Change the parent
+                    if (oldParent != null)
+                    {
+                        DetachFromParent();
+                    }
+                    if (parent != null)
+                    {
+                        AttachToParent(parent);
+                    }
 
-					// Change the parent
-					if (m_parent != null)
-					{
-						m_parent.m_children.Remove(this);
-					}
-					var oldParent = m_parent;
-					m_parent = parent;
-					if (m_parent != null)
-					{
-						m_parent.m_children.Add(this);
-					}
-
-					// Old ancestors
-					if (oldParent != null)
-					{
-						foreach (var oldParentListener in oldParent.Entity.GetComponentsWithInterface<IHierarchyListener>())
-						{
-							oldParentListener.OnChildRemoved(Entity);
-						}
-						if (oldAncestorDescendantListeners != null)
-						{
-							foreach (var oldParentListener in oldAncestorDescendantListeners)
-							{
-								oldParentListener.OnDescendantRemoved(Entity);
-								foreach(var descendant in Descendants)
-								{
-									oldParentListener.OnDescendantRemoved(descendant);
-								}
-							}
-						}
-					}
-
-					// New ancestors
-					if (parent != null)
-					{
-						foreach (var newParentListener in parent.Entity.GetComponentsWithInterface<IHierarchyListener>())
-						{
-							newParentListener.OnChildAdded(Entity);
-						}
-						foreach (var newParentListener in GetAncestorsWithInterface<IDescendantListener>())
-						{
-							newParentListener.OnDescendantAdded(Entity);
-							foreach(var descendant in Descendants)
-							{
-								newParentListener.OnDescendantAdded(descendant);
-							}
-						}
-					}
-
+                    // Notify interested parties:
 					// Self
 					foreach (var listener in Entity.GetComponentsWithInterface<IHierarchyListener>())
 					{
@@ -1016,7 +931,15 @@ namespace Dan200.Core.Components.Core
 			}
 		}
 
-		public ChildCollection Children
+        public bool HasChildren
+        {
+            get
+            {
+                return m_firstChild != null;
+            }
+        }
+
+        public ChildCollection Children
 		{
 			get
 			{
@@ -1040,18 +963,77 @@ namespace Dan200.Core.Components.Core
 			}
 		}
 
-		private void Init()
-		{
-			if (m_children == null)
-			{
-				m_parent = null;
-				m_children = new List<HierarchyComponent>();
-			}
-		}
+        public BitField ComponentsOnAncestorsMask
+        {
+            get
+            {
+                var result = new BitField();
+                var parent = m_parent;
+                while(parent != null)
+                {
+                    result |= parent.Entity.ComponentsMask;
+                    parent = parent.m_parent;
+                }
+                return result;
+            }
+        }
+
+        private void AttachToParent(HierarchyComponent parent)
+        {
+            App.Assert(parent != null);
+            App.Assert(m_parent == null);
+            App.Assert(m_nextSibling == null);
+            App.Assert(m_previousSibling == null);
+
+            if(parent.m_firstChild != null)
+            {
+                m_nextSibling = parent.m_firstChild;
+                m_nextSibling.m_previousSibling = this;
+            }
+            m_parent = parent;
+            m_parent.m_firstChild = this;
+        }
+
+        private void DetachFromParent()
+        {
+            App.Assert(m_parent != null);
+
+            if(m_nextSibling != null)
+            {
+                m_nextSibling.m_previousSibling = m_previousSibling;
+            }
+            if(m_previousSibling != null)
+            {
+                m_previousSibling.m_nextSibling = m_nextSibling;
+            }
+            if(m_parent.m_firstChild == this)
+            {
+                m_parent.m_firstChild = m_nextSibling;
+            }
+            m_parent = null;
+            m_nextSibling = null;
+            m_previousSibling = null;
+        }
+
+        private void DetachChildren()
+        {
+            App.Assert(m_firstChild != null);
+
+            var child = m_firstChild;
+            do
+            {
+                var nextChild = child.m_nextSibling;
+                child.m_parent = null;
+                child.m_nextSibling = null;
+                child.m_previousSibling = null;
+                child = nextChild;
+            }
+            while (child != null);
+            m_firstChild = null;
+        }
 
         protected override void OnInit(in HierarchyComponentData properties)
 		{
-			Init();
             if (properties.Parent != 0)
 			{
 				// Get the parent
@@ -1061,23 +1043,11 @@ namespace Dan200.Core.Components.Core
 
 				var parentHierarchy = parent.GetComponent<HierarchyComponent>();
 				App.Assert(parentHierarchy != null);
-				parentHierarchy.Init();
 
-				// Attach to the parent
-				m_parent = parentHierarchy;
-				parentHierarchy.m_children.Add(this);
+                // Attach to the parent
+                AttachToParent(parentHierarchy);
 
 				// Notify all interested parties:
-				// Ancestors
-				foreach (var parentListener in parent.GetComponentsWithInterface<IHierarchyListener>())
-				{
-					parentListener.OnChildAdded(Entity);
-				}
-				foreach (var parentListener in GetAncestorsWithInterface<IDescendantListener>())
-				{
-					parentListener.OnDescendantAdded(Entity);
-				}
-
 				// Self
 				foreach (var listener in Entity.GetComponentsWithInterface<IHierarchyListener>())
 				{
@@ -1092,7 +1062,7 @@ namespace Dan200.Core.Components.Core
 			}
 		}
 
-        protected override void ReInit(in HierarchyComponentData properties)
+        protected override void Reset(in HierarchyComponentData properties)
         {
             var parentID = properties.Parent;
             if (parentID != 0)
@@ -1109,119 +1079,54 @@ namespace Dan200.Core.Components.Core
 
         protected override void OnShutdown()
 		{
-			// Get informatiom about ancestors
-			Entity oldParent = null;
-			List<IDescendantListener> oldAncestorDescendantListeners = null;
-			if (m_parent != null)
+			// Detach from the parent
+			var oldParent = m_parent;
+			if (oldParent != null)
 			{
-				// Get the parent entity
-				oldParent = m_parent.Entity;
-
-				// Get ancestor listeners
-				var Enumerator = GetAncestorsWithInterface<IDescendantListener>().GetEnumerator();
-				if (Enumerator.MoveNext())
-				{
-					oldAncestorDescendantListeners = new List<IDescendantListener>();
-					do
-					{
-						oldAncestorDescendantListeners.Add(Enumerator.Current);
-					}
-					while (Enumerator.MoveNext());
-				}
-				
-				// Disconnect from the parent
-				m_parent.m_children.Remove(this);
-				m_parent = null;
+                DetachFromParent();
 			}
 
 			// Get information about descendants
-			List<Entity> oldChildren = null;
-			List<Entity> oldDescendants = null;
 			List<IHierarchyListener> oldChildrenHierarchyListeners = null;
 			List<IAncestryListener> oldDescendantAncestorListeners = null;
 
 			// Get descendant listeners (includes self)
-			var Enumerator2 = GetDescendantsWithInterface<IAncestryListener>(true).GetEnumerator();
-			if (Enumerator2.MoveNext())
+			var enumerator = GetDescendantsWithInterface<IAncestryListener>(true).GetEnumerator();
+			if (enumerator.MoveNext())
 			{
 				oldDescendantAncestorListeners = new List<IAncestryListener>();
 				do
 				{
-					oldDescendantAncestorListeners.Add(Enumerator2.Current);
+					oldDescendantAncestorListeners.Add(enumerator.Current);
 				}
-				while (Enumerator2.MoveNext());
+				while (enumerator.MoveNext());
 			}
 
-			if (m_children.Count > 0)
+			if (HasChildren)
 			{
-				// Collect child listeners before we clear the children
-				if ((Entity.ComponentsMask & ComponentRegistry.GetComponentsImplementingInterface<IHierarchyListener>()) != BitField.Empty)
-				{
-					oldChildren = new List<Entity>(Children);
-				}
-				if (oldAncestorDescendantListeners != null)
-				{
-					oldDescendants = new List<Entity>(Descendants);
-				}
-				var Enumerator = GetChildrenWithInterface<IHierarchyListener>().GetEnumerator();
-				if (Enumerator.MoveNext())
+				// Get child listeners
+				var enumerator2 = GetChildrenWithInterface<IHierarchyListener>().GetEnumerator();
+				if (enumerator2.MoveNext())
 				{
 					oldChildrenHierarchyListeners = new List<IHierarchyListener>();
 					do
 					{
-						oldChildrenHierarchyListeners.Add(Enumerator.Current);
+						oldChildrenHierarchyListeners.Add(enumerator2.Current);
 					}
-					while (Enumerator.MoveNext());
+					while (enumerator2.MoveNext());
 				}
 
-				// Clear the children
-				foreach (var child in m_children)
-				{
-					child.m_parent = null;
-				}
-				m_children.Clear();
+                // Detach the children
+                DetachChildren();
 			}
 
 			// Notify all interested parties
-			// Old ancestors
-			if (oldParent != null)
-			{
-				foreach (var oldParentListener in oldParent.GetComponentsWithInterface<IHierarchyListener>())
-				{
-					oldParentListener.OnChildRemoved(Entity);
-				}
-				if (oldAncestorDescendantListeners != null)
-				{
-					foreach (var oldParentListener in oldAncestorDescendantListeners)
-					{
-						oldParentListener.OnDescendantRemoved(Entity);
-						if (oldDescendants != null)
-						{
-							foreach(var oldDescendant in oldDescendants)
-							{
-								oldParentListener.OnDescendantRemoved(oldDescendant);
-							}
-						}
-					}
-				}
-			}
-
 			// Self
 			if (oldParent != null)
 			{
 				foreach (var listener in Entity.GetComponentsWithInterface<IHierarchyListener>())
 				{
-					listener.OnParentChanged(oldParent, null);
-				}
-			}
-			if (oldChildren != null)
-			{
-				foreach (var listener in Entity.GetComponentsWithInterface<IHierarchyListener>())
-				{
-					foreach (var child in oldChildren)
-					{
-						listener.OnChildRemoved(child);
-					}
+					listener.OnParentChanged(oldParent.Entity, null);
 				}
 			}
 
@@ -1233,6 +1138,8 @@ namespace Dan200.Core.Components.Core
 					listener.OnParentChanged(Entity, null);
 				}
 			}
+
+            // Old descendants
 			if (oldDescendantAncestorListeners != null)
 			{
 				foreach (var listener in oldDescendantAncestorListeners)
@@ -1241,10 +1148,11 @@ namespace Dan200.Core.Components.Core
 				}
 			}
 
-			// Check nothing else was re-attached to us
+			// Check that nothing else was re-attached to us
 			App.Assert(m_parent == null);
-			App.Assert(m_children.Count == 0);
-			m_children = null;
+			App.Assert(m_firstChild == null);
+            App.Assert(m_nextSibling == null);
+            App.Assert(m_previousSibling == null);
 		}
 
 		public TComponent GetAncestorWithComponent<TComponent>(bool includeSelf = false) where TComponent : ComponentBase
@@ -1295,10 +1203,6 @@ namespace Dan200.Core.Components.Core
 		public void OnComponentAdded(ComponentBase component)
 		{
 			var entity = Entity;
-			foreach (var listener in GetAncestorsWithInterface<IDescendantListener>(false))
-			{
-				listener.OnComponentAdded(entity, component);
-			}
 			foreach (var listener in GetDescendantsWithInterface<IAncestryListener>(false))
 			{
 				listener.OnComponentAdded(entity, component);
@@ -1308,10 +1212,6 @@ namespace Dan200.Core.Components.Core
 		public void OnComponentRemoved(ComponentBase component)
 		{
 			var entity = Entity;
-			foreach (var listener in GetAncestorsWithInterface<IDescendantListener>(false))
-			{
-				listener.OnComponentRemoved(entity, component);
-			}
 			foreach (var listener in GetDescendantsWithInterface<IAncestryListener>(false))
 			{
 				listener.OnComponentRemoved(entity, component);

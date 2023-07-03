@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using Dan200.Core.Platform.SDL2;
 using Dan200.Core.Render.OpenGL;
+using Dan200.Core.Math;
 
 #if STEAM
 using Dan200.Core.Input.Steamworks;
@@ -61,6 +62,14 @@ namespace Dan200.Core.Window.SDL2
             get
             {
                 return m_height;
+            }
+        }
+
+        public Vector2I Size
+        {
+            get
+            {
+                return new Vector2I(m_width, m_height);
             }
         }
 

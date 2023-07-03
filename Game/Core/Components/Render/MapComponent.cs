@@ -32,10 +32,10 @@ namespace Dan200.Core.Components.Render
         protected override void OnInit(in MapComponentData properties)
         {
             m_transform = Entity.GetComponent<TransformComponent>();
-            ReInit(properties);
+            Reset(properties);
         }
 
-        protected override void ReInit(in MapComponentData properties)
+        protected override void Reset(in MapComponentData properties)
         {
             m_map = Map.Get(properties.Map);
             m_entityIndex = properties.MapEntityIndex;

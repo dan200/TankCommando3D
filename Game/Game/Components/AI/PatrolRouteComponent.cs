@@ -1,5 +1,6 @@
 ﻿using Dan200.Core.Components.Core;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Level;
 using Dan200.Core.Main;
 using Dan200.Core.Render;
@@ -37,10 +38,10 @@ namespace Dan200.Game.Components.AI
         protected override void OnInit(in PatrolRouteComponentData properties)
         {
             m_transform = Entity.GetComponent<TransformComponent>();
-            ReInit(properties);
+            Reset(properties);
         }
 
-        protected override void ReInit(in PatrolRouteComponentData properties)
+        protected override void Reset(in PatrolRouteComponentData properties)
         {
             // Gather the waypoints
             var nameSystem = Level.GetSystem<NameSystem>();
@@ -49,7 +50,7 @@ namespace Dan200.Game.Components.AI
             for(int i=0; i<properties.Waypoints.Length; ++i)
             {
                 var waypointName = properties.Waypoints[i];
-                var entity = nameSystem.Lookup(waypointName);
+                var entity = nameSystem.Lookup("../" + waypointName, Entity);
                 if(entity == null)
                 {
                     App.LogError("Waypoint {0} does not exist", waypointName);

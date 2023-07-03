@@ -117,6 +117,7 @@ namespace Dan200.Core.Audio.OpenAL
 
             // Start the background thread
             var thread = new Thread(Run);
+            thread.Name = "OpenALMusicPlayback";
             thread.Start();
         }
 

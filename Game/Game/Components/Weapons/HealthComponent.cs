@@ -1,4 +1,6 @@
-﻿using Dan200.Core.Level;
+﻿using Dan200.Core.Interfaces;
+using Dan200.Core.Level;
+using Dan200.Core.Lua;
 using Dan200.Core.Main;
 using Dan200.Core.Math;
 using Dan200.Core.Serialisation;
@@ -39,7 +41,7 @@ namespace Dan200.Game.Components.Weapons
         }
     }
 
-    internal class HealthComponent : Component<HealthComponentData>
+    internal class HealthComponent : Component<HealthComponentData>, ILuaScriptable
     {
         private HealthComponent m_redirect;
         private float m_health;
@@ -155,6 +157,13 @@ namespace Dan200.Game.Components.Weapons
                     FireOnDeath(damage);
                 }
             }
+        }
+
+        [LuaMethod]
+        public LuaArgs setInvulnerable(in LuaArgs args)
+        {
+            Invulnerable = args.GetOptionalBool(0, true);
+            return LuaArgs.Empty;
         }
 
         private void FireOnDamaged(in Damage damage)

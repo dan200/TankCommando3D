@@ -2,6 +2,7 @@
 {
 	Components = {
 		Name = {},
+		Hierarchy = {},
 		Transform = {
 			Position = Property("Position"),
 			Rotation = Property("Rotation"),
@@ -15,7 +16,7 @@
 			CollisionGroup = "Prop",
 		},
 		Health = {
-			MaxHealth = 25,
+			MaxHealth = 40,
 		},
 		Breakable = {},
 		Despawner = {

@@ -1,6 +1,8 @@
 ﻿using Dan200.Core.Components.Core;
+using Dan200.Core.Components.Physics;
 using Dan200.Core.Geometry;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Level;
 using Dan200.Core.Main;
 using Dan200.Core.Math;
@@ -32,13 +34,13 @@ namespace Dan200.Game.Components.AI
         public string EyeTransformPath;
     }
 
-    [RequireSystem(typeof(PhysicsSystem))]
     [RequireSystem(typeof(NameSystem))]
-    [AfterComponent(typeof(NameComponent))]
+    [RequireComponentOnAncestor(typeof(PhysicsWorldComponent))]
     [RequireComponent(typeof(TransformComponent))]
+    [AfterComponent(typeof(NameComponent))]
     internal class SightComponent : Component<SightComponentData>, IUpdate, IDebugDraw
     {
-        private PhysicsSystem m_physics;
+        private PhysicsWorldComponent m_physics;
         private TransformComponent m_transform;
         private SightComponentData m_properties;
         private List<Entity> m_visibleTargets;
@@ -53,7 +55,7 @@ namespace Dan200.Game.Components.AI
 
         protected override void OnInit(in SightComponentData properties)
         {
-            m_physics = Level.GetSystem<PhysicsSystem>();
+            m_physics = Entity.GetComponentOnAncestor<PhysicsWorldComponent>();
             if(properties.EyeTransformPath != null)
             {
                 m_transform = Level.GetSystem<NameSystem>().Lookup(properties.EyeTransformPath, Entity).GetComponent<TransformComponent>();

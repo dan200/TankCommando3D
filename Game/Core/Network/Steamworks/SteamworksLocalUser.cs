@@ -43,9 +43,9 @@ namespace Dan200.Core.Network.Steamworks
 			m_network.RemoveLocalUserAchievement(achievement);
         }
 
-        public void IndicateAchievementProgress(Achievement achievement, int currentValue, int unlockValue)
+        public void UpdateAchievementProgress(Achievement achievement, int currentValue, int unlockValue, bool notify)
         {
-            m_network.IndicateLocalUserAchievementProgress(achievement, currentValue, unlockValue);
+            m_network.UpdateLocalUserAchievementProgress(achievement, currentValue, unlockValue, notify);
         }
 
 		public void AddStatistic(Statistic statistic, int count)

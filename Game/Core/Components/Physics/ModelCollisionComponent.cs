@@ -39,11 +39,11 @@ namespace Dan200.Core.Components.Physics
             Assets.Assets.OnAssetsReloaded += OnAssetsReloaded;
         }
 
-        protected override void ReInit(in ModelCollisionComponentData properties)
+        protected override void Reset(in ModelCollisionComponentData properties)
         {
             m_model = Model.Get(properties.Model);
             m_properties = properties;
-            base.ReInit(properties);
+            base.Reset(properties);
         }
 
         protected override void OnShutdown()

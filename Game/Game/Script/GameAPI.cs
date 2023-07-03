@@ -31,7 +31,7 @@ namespace Dan200.Game.Script
 		[LuaMethod]
 		public LuaArgs getPlatform(in LuaArgs args)
 		{
-			return new LuaArgs(App.PlatformID.ToString());
+			return new LuaArgs(App.Platform.Type.ToString());
 		}
 
         [LuaMethod]
@@ -83,7 +83,15 @@ namespace Dan200.Game.Script
         [LuaMethod]
         public LuaArgs editLevel(in LuaArgs args)
         {
-            var levelPath = args.GetString(0);
+            string levelPath;
+            if (args.IsNil(0) && m_state is LevelState)
+            {
+                levelPath = m_state.Level.Data.Path;
+            }
+            else
+            {
+                levelPath = args.GetString(0);
+            }
             m_state.Game.QueueState(new EditorState(m_state.Game, levelPath, levelPath));
             return LuaArgs.Empty;
         }

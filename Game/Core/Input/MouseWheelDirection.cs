@@ -7,4 +7,12 @@
         Left,
         Right
     }
+
+    internal static class MouseWheelDirectionExtensions
+    {
+        public static string GetPrompt(this MouseWheelDirection direction)
+        {
+            return "Inputs.Mouse.Wheel" + direction;
+        }
+    }
 }

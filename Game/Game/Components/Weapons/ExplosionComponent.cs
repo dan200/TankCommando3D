@@ -3,6 +3,7 @@ using Dan200.Core.Components.Physics;
 using Dan200.Core.Components.Render;
 using Dan200.Core.Geometry;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Level;
 using Dan200.Core.Lua;
 using Dan200.Core.Main;
@@ -12,6 +13,7 @@ using Dan200.Core.Render;
 using Dan200.Core.Serialisation;
 using Dan200.Core.Systems;
 using Dan200.Core.Util;
+using Dan200.Game.Interfaces;
 using Dan200.Game.Systems.AI;
 using System;
 using System.Collections.Generic;
@@ -45,14 +47,14 @@ namespace Dan200.Game.Components.Weapons
         public float PhysicsImpulse;
     }
 
-    [RequireSystem(typeof(PhysicsSystem))]
     [RequireSystem(typeof(NoiseSystem))]
+    [RequireComponentOnAncestor(typeof(PhysicsWorldComponent))]
     [RequireComponent(typeof(TransformComponent))]
     [RequireComponent(typeof(ModelComponent))]
     [AfterComponent(typeof(HealthComponent))]
-    internal class ExplosionComponent : Component<ExplosionComponentData>, IUpdate
+    internal class ExplosionComponent : Component<ExplosionComponentData>, IUpdate, IDamagePropagator
     {
-        private PhysicsSystem m_physics;
+        private PhysicsWorldComponent m_physics;
         private NoiseSystem m_noise;
         private TransformComponent m_transform;
         private ModelComponent m_model;
@@ -70,7 +72,7 @@ namespace Dan200.Game.Components.Weapons
 
         protected override void OnInit(in ExplosionComponentData properties)
         {
-            m_physics = Level.GetSystem<PhysicsSystem>();
+            m_physics = Entity.GetComponentOnAncestor<PhysicsWorldComponent>();
             m_transform = Entity.GetComponent<TransformComponent>();
             m_model = Entity.GetComponent<ModelComponent>();
             m_properties = properties;

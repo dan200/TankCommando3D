@@ -53,7 +53,7 @@ namespace Dan200.Game.GUI
             var imageSize = new Vector2(m_texture.Width, m_texture.Height);
             builder.AddQuad(
                 centre - new Vector2(0.5f * imageSize.X, imageSize.Y),
-                centre + new Vector2(0.4f * imageSize.X, 0.0f),
+                centre + new Vector2(0.5f * imageSize.X, 0.0f),
                 m_texture
             );
 

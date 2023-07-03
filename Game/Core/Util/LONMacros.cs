@@ -5,6 +5,14 @@ namespace Dan200.Core.Util
 {
     internal static class LONMacros
     {
+        public static LuaValue Vector2(in LuaArgs args)
+        {
+            var table = new LuaTable(2);
+            table["X"] = args.GetFloat(0);
+            table["Y"] = args.GetFloat(1);
+            return table;
+        }
+
         public static LuaValue Vector3(in LuaArgs args)
         {
             var table = new LuaTable(3);

@@ -26,7 +26,7 @@ namespace Dan200.Core.Platform.SDL2
 {
 	internal class SDL2Platform : IPlatform
 	{
-		private PlatformID m_platform;
+		private PlatformType m_platform;
 		private INetwork m_network;
 		private List<SDL2Window> m_windows;
 		private HeadlessWindow m_headlessWindow;
@@ -39,15 +39,15 @@ namespace Dan200.Core.Platform.SDL2
 		private bool m_sdlImageInitialised;
 		private bool m_openGLInitialised;
 
-		public bool SupportsMultipleWindows
+		public bool Headless
 		{
 			get
 			{
-                return !m_headless;
+                return m_headless;
 			}
 		}
 
-		public PlatformID PlatformID
+		public PlatformType Type
 		{
 			get
 			{
@@ -83,22 +83,22 @@ namespace Dan200.Core.Platform.SDL2
 			{
 				case "Windows":
 					{
-						m_platform = PlatformID.Windows;
+						m_platform = PlatformType.Windows;
 						break;
 					}
 				case "Mac OS X":
 					{
-						m_platform = PlatformID.MacOS;
+						m_platform = PlatformType.MacOS;
 						break;
 					}
 				case "Linux":
 					{
-						m_platform = PlatformID.Linux;
+						m_platform = PlatformType.Linux;
 						break;
 					}
 				default:
 					{
-						m_platform = PlatformID.Unknown;
+						m_platform = PlatformType.Unknown;
 						break;
 					}
 			}
@@ -240,7 +240,7 @@ namespace Dan200.Core.Platform.SDL2
 
 		private bool OpenExternalWebBrowser(string url)
 		{
-            if (App.Steam && PlatformID == PlatformID.Linux) // Steam's Linux sandbox doesn't like browsers :(
+            if (App.Steam && Type == PlatformType.Linux) // Steam's Linux sandbox doesn't like browsers :(
             {
                 return false;
             }
@@ -365,9 +365,8 @@ namespace Dan200.Core.Platform.SDL2
 			else
 			{
 				// Save to the system save directory provided by SDL2
-				var savePath = SDL.SDL_GetPrefPath(App.Info.DeveloperName, App.Info.Title);
+				var savePath = SDL.SDL_GetPrefPath(App.Info.Author, App.Info.Title);
 				SDLUtils.CheckResult("SDL_GetPrefPath", savePath);
-				App.SavePath = savePath.Replace(App.Info.DeveloperName + Path.DirectorySeparatorChar, "");
 				Directory.CreateDirectory(App.SavePath);
 			}
 #endif
@@ -382,7 +381,7 @@ namespace Dan200.Core.Platform.SDL2
 			}
 			else
 			{
-				if (App.PlatformID == PlatformID.MacOS)
+				if (App.Platform.Type == PlatformType.MacOS)
 				{
 					// On OSX, use a local path to avoid ambiguity between .app and .exe location
 					App.AssetPath = "assets";

@@ -4,6 +4,7 @@ using Dan200.Core.Lua;
 using Dan200.Core.Math;
 using Dan200.Core.Util;
 using Dan200.Game.Components.Misc;
+using Dan200.Game.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,13 +51,12 @@ namespace Dan200.Game.Components.Weapons
             properties["Radius"] = 4.0f;
             properties["Lifespan"] = 0.1f;
             properties["Damage"] = 80.0f;
-            var explosion = prefab.Instantiate(Level, properties);
+            var explosion = prefab.Instantiate(Level, properties, 1); // TODO
 
-            // Propogate damage origin
-            var explosionComponent = explosion.GetComponent<ExplosionComponent>();
-            if (explosionComponent != null)
+            // Propagate damage origin
+            foreach (var propagator in explosion.GetComponentsWithInterface<IDamagePropagator>())
             {
-                explosionComponent.DamageOrigin = args.Damage.Origin;
+                propagator.DamageOrigin = args.Damage.Origin;
             }
 
             // Destroy ourselves

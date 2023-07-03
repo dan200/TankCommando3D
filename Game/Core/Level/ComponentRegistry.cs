@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using Dan200.Core.Interfaces;
 using Dan200.Core.Serialisation;
+using Dan200.Core.Components.Core;
 
 namespace Dan200.Core.Level
 {
@@ -38,7 +39,9 @@ namespace Dan200.Core.Level
             public StructLayout DataLayout;
             public BitField RequiredSystems;
             public BitField RequiredComponents;
-            public BitField DependendedOnComponents;
+            public BitField RequiredComponentsOnAncestors;
+            public BitField RequiredComponentsOnAncestorsOrSelf;
+            public BitField DependedOnComponents;
             public BitField DependentComponents;
             public BitField ImplementedInterfaces;
             public bool Finalised;
@@ -212,7 +215,7 @@ namespace Dan200.Core.Level
 			try
 			{
                 // Merge requirements and dependencies
-                var dependencies = component.DependendedOnComponents;
+                var dependencies = component.DependedOnComponents;
                 foreach(var dependencyID in dependencies)
                 {
                     var dependencyComponent = s_registeredComponents[dependencyID];
@@ -228,10 +231,18 @@ namespace Dan200.Core.Level
                         }
                         FinaliseComponent(dependencyComponent, o_updateOrder);
                     }
-                    component.DependendedOnComponents |= dependencyComponent.DependendedOnComponents;
+                    component.DependedOnComponents |= dependencyComponent.DependedOnComponents;
                     if(component.RequiredComponents[dependencyID])
                     {
                         component.RequiredComponents |= dependencyComponent.RequiredComponents;
+                    }
+                    if(component.RequiredComponentsOnAncestors[dependencyID])
+                    {
+                        component.RequiredComponentsOnAncestors |= dependencyComponent.RequiredComponentsOnAncestors;
+                    }
+                    if (component.RequiredComponentsOnAncestorsOrSelf[dependencyID])
+                    {
+                        component.RequiredComponentsOnAncestorsOrSelf |= dependencyComponent.RequiredComponentsOnAncestorsOrSelf;
                     }
                 }
 
@@ -239,7 +250,9 @@ namespace Dan200.Core.Level
                 var editableComponents = GetComponentsImplementingInterface<IEditable>();
                 if(editableComponents[component.ID])
                 {
-                    var nonEditableDependencies = component.RequiredComponents & ~editableComponents;
+                    var nonEditableDependencies = 
+                        (component.RequiredComponents | component.RequiredComponentsOnAncestors | component.RequiredComponentsOnAncestorsOrSelf) &
+                        ~editableComponents;
                     if (!nonEditableDependencies.IsEmpty)
                     {
                         throw new Exception(string.Format(
@@ -311,6 +324,7 @@ namespace Dan200.Core.Level
                 }
 
                 // Don't allow systems to rely on components (systems always advance before components)
+                App.Assert(system.Type.GetCustomAttributes<RequireComponentOnAncestorAttribute>().Count() == 0);
                 App.Assert(system.Type.GetCustomAttributes<RequireComponentAttribute>().Count() == 0);
                 App.Assert(system.Type.GetCustomAttributes<AfterComponentAttribute>().Count() == 0);
 
@@ -334,6 +348,8 @@ namespace Dan200.Core.Level
                     }
                 }
             }
+
+            var hierarchyID = GetComponentID<HierarchyComponent>();
             foreach (var component in s_registeredComponents)
             {
                 // Get requirements
@@ -342,14 +358,29 @@ namespace Dan200.Core.Level
                     var id = GetComponentID(attribute.RequiredType);
                     component.RequiredComponents[id] = true;
                 }
+                foreach (var attribute in component.Type.GetCustomAttributes<RequireComponentOnAncestorAttribute>())
+                {
+                    var id = GetComponentID(attribute.RequiredType);
+                    component.RequiredComponents[hierarchyID] = true;
+                    if(attribute.IncludeSelf)
+                    {
+                        component.RequiredComponentsOnAncestorsOrSelf[id] = true;
+                    }
+                    else
+                    {
+                        component.RequiredComponentsOnAncestors[id] = true;
+                    }
+                }
 
                 // Get after dependencies
-                component.DependendedOnComponents |= component.RequiredComponents;
+                component.DependedOnComponents |= component.RequiredComponents;
+                component.DependedOnComponents |= component.RequiredComponentsOnAncestors;
+                component.DependedOnComponents |= component.RequiredComponentsOnAncestorsOrSelf;
                 foreach (var attribute in component.Type.GetCustomAttributes<AfterComponentAttribute>())
                 {
                     var id = GetComponentID(attribute.DependentType);
                     var otherComponent = s_registeredComponents[id];
-                    component.DependendedOnComponents[id] = true;
+                    component.DependedOnComponents[id] = true;
                 }
 
                 // Get before dependencies
@@ -357,7 +388,7 @@ namespace Dan200.Core.Level
                 {
                     var id = GetComponentID(attribute.DependentType);
                     var otherComponent = s_registeredComponents[id];
-                    otherComponent.DependendedOnComponents[component.ID] = true;
+                    otherComponent.DependedOnComponents[component.ID] = true;
                 }
 
                 // Get system requirements
@@ -413,7 +444,7 @@ namespace Dan200.Core.Level
 				{
 					FinaliseComponent(component, componentUpdateOrder);
 				}
-                foreach (var dependencyID in component.DependendedOnComponents)
+                foreach (var dependencyID in component.DependedOnComponents)
                 {
                     s_registeredComponents[dependencyID].DependentComponents[component.ID] = true;
                 }
@@ -468,7 +499,9 @@ namespace Dan200.Core.Level
 			{
                 component.RequiredSystems = Remap(component.RequiredSystems, oldToNewSystemID);
                 component.RequiredComponents = Remap(component.RequiredComponents, oldToNewComponentID);
-                component.DependendedOnComponents = Remap(component.DependendedOnComponents, oldToNewComponentID);
+                component.RequiredComponentsOnAncestors = Remap(component.RequiredComponentsOnAncestors, oldToNewComponentID);
+                component.RequiredComponentsOnAncestorsOrSelf = Remap(component.RequiredComponentsOnAncestorsOrSelf, oldToNewComponentID);
+                component.DependedOnComponents = Remap(component.DependedOnComponents, oldToNewComponentID);
                 component.DependentComponents = Remap(component.DependentComponents, oldToNewComponentID);
 			}
             foreach (var componentInterface in s_registeredInterfaces)
@@ -573,9 +606,19 @@ namespace Dan200.Core.Level
 			return LookupComponent(componentID).RequiredComponents;
 		}
 
+        public static BitField GetRequiredComponentsOnAncestors(int componentID)
+        {
+            return LookupComponent(componentID).RequiredComponentsOnAncestors;
+        }
+
+        public static BitField GetRequiredComponentsOnAncestorsOrSelf(int componentID)
+        {
+            return LookupComponent(componentID).RequiredComponentsOnAncestorsOrSelf;
+        }
+
         public static BitField GetDependedOnComponents(int componentID)
         {
-            return LookupComponent(componentID).DependendedOnComponents;
+            return LookupComponent(componentID).DependedOnComponents;
         }
 
         public static BitField GetDependentComponents(int componentID)

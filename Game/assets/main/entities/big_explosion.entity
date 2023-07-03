@@ -1,6 +1,7 @@
 ﻿-- Entity data
 {
 	Components = {
+		Hierarchy = {},
 		Transform = {
 			Position = Property("Position"),
 			Rotation = Property("Rotation"),

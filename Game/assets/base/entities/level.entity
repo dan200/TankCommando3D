@@ -1,0 +1,10 @@
+﻿-- Entity data
+{
+	Components = {
+		Hierarchy = {},
+		PhysicsWorld = {
+			Gravity = Vector3( 0, -9.8, 0 ),
+		},
+		NavGraph = {},
+	},
+}

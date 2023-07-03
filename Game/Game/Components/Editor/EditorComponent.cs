@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using Dan200.Core.Components.Core;
+using Dan200.Core.Components.Physics;
 using Dan200.Core.Components.Render;
 using Dan200.Core.GUI;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Level;
 using Dan200.Core.Lua;
 using Dan200.Core.Main;
@@ -23,12 +25,13 @@ namespace Dan200.Game.Components.Editor
     }
 
     [RequireSystem(typeof(GUISystem))]
-    [RequireSystem(typeof(PhysicsSystem))]
+    [RequireComponentOnAncestor(typeof(PhysicsWorldComponent))]
     [AfterComponent(typeof(TransformComponent))]
     [AfterComponent(typeof(ModelComponent))]
     internal class EditorComponent : Component<EditorComponentData>, IUpdate
     {
         private TransformComponent m_transform;
+        private bool m_selected;
 
         private EntityPrefab m_prefab;
         private LuaTable m_properties;
@@ -38,8 +41,25 @@ namespace Dan200.Game.Components.Editor
 
         public bool Selected
         {
-            get;
-            set;
+            get
+            {
+                return m_selected;
+            }
+            set
+            {
+                if(m_selected != value)
+                {
+                    if(m_selected)
+                    {
+                        RemoveManipulators();
+                    }
+                    m_selected = value;
+                    if (m_selected)
+                    {
+                        AddManipulators();
+                    }
+                }
+            }
         }
 
         public bool Hover
@@ -70,10 +90,12 @@ namespace Dan200.Game.Components.Editor
             m_prefab = EntityPrefab.Get( properties.Prefab );
             m_properties = properties.Properties;
 
+            RemoveInvalidProperties();
+
             if (m_transform != null)
             {
-                var physicsSystem = Level.GetSystem<PhysicsSystem>();
-                m_physics = physicsSystem.World.CreateStaticObject(PhysicsMaterial.Default);
+                var physicsWorldComponent = Entity.GetComponentOnAncestor<PhysicsWorldComponent>();
+                m_physics = physicsWorldComponent.World.CreateStaticObject(PhysicsMaterial.Default);
                 m_physics.UserData = Entity;
                 m_physics.Transform = m_transform.Transform;
 
@@ -81,14 +103,14 @@ namespace Dan200.Game.Components.Editor
                 if (model != null)
                 {
                     var boundingBox = model.Instance.Model.BoundingBox;
-                    m_shape = physicsSystem.World.CreateBox(
+                    m_shape = physicsWorldComponent.World.CreateBox(
                         Matrix4.CreateTranslation(boundingBox.Center),
                         boundingBox.Size
                     );
                 }
                 else
                 {
-                    m_shape = physicsSystem.World.CreateBox(
+                    m_shape = physicsWorldComponent.World.CreateBox(
                         Matrix4.Identity,
                         new Vector3(0.5f, 0.5f, 0.5f)
                     );
@@ -101,6 +123,11 @@ namespace Dan200.Game.Components.Editor
 
         protected override void OnShutdown()
         {
+            if(m_selected)
+            {
+                RemoveManipulators();
+                m_selected = false;
+            }
             if(m_physics != null)
             {
                 m_physics.RemoveShape(m_shape);
@@ -109,6 +136,22 @@ namespace Dan200.Game.Components.Editor
 
                 m_physics.Dispose();
                 m_physics = null;
+            }
+        }
+
+        private void AddManipulators()
+        {
+            foreach (var editable in Entity.GetComponentsWithInterface<IEditable>())
+            {
+                editable.AddManipulators(this);
+            }
+        }
+
+        private void RemoveManipulators()
+        {
+            foreach (var editable in Entity.GetComponentsWithInterface<IEditable>())
+            {
+                editable.RemoveManipulators(this);
             }
         }
 
@@ -129,23 +172,48 @@ namespace Dan200.Game.Components.Editor
             }
         }
 
-        public void ReInit()
+        private void RemoveInvalidProperties()
+        {
+            List<LuaValue> propertiesToRemove = null;
+            foreach(var property in m_properties)
+            {
+                var key = property.Key;
+                if(!key.IsString() ||
+                   !(key.ToString() == "Name" || m_prefab.Properties.ContainsKey(key.GetString())))
+                {
+                    if(propertiesToRemove == null)
+                    {
+                        propertiesToRemove = new List<LuaValue>(m_properties.Count);
+                    }
+                    propertiesToRemove.Add(key);
+                }
+            }
+            if(propertiesToRemove != null)
+            {
+                foreach(var key in propertiesToRemove)
+                {
+                    m_properties[key] = LuaValue.Nil;
+                }
+            }
+        }
+
+        public void ResetFromProperties()
         {
             var infos = new List<EntityCreationInfo>();
             m_prefab.SetupCreationInfo(Entity.ID, m_properties, infos);
             App.Assert(infos.Count >= 1);
 
-            var editableComponents = ComponentRegistry.GetComponentsImplementingInterface<IEditable>();
+            var resettableComponents = ComponentRegistry.GetComponentsImplementingInterface<IResettable>();
             for (int i = 0; i < infos.Count; ++i)
             {
                 var info = infos[i];
                 var entity = Level.Entities.Lookup(info.ID);
                 App.Assert(entity != null);
-                foreach(var componentID in (info.Components & editableComponents))
+                foreach(var componentID in (info.Components & resettableComponents))
                 {
-                    var component = entity.GetComponent(componentID) as IEditable;
+                    var component = entity.GetComponent(componentID) as IResettable;
                     App.Assert(component != null);
-                    component.ReInit(info.ComponentProperties[componentID]);
+                    component.Reset(info.ComponentProperties[componentID]);
                 }
             }
         }

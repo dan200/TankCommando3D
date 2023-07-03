@@ -9,27 +9,33 @@ namespace Dan200.Core.Multiplayer
 {
     internal class RemoteConnection : IConnection, IDisposable
     {
-        private const int MAX_PACKET_SIZE = 8192;
+        private const int MAX_MESSAGE_SIZE = 8192;
         private const int PING_INTERVAL = 5000;
+        private const int TIMEOUT = 10000;
 
-        private ConnectionStatus m_status;
+        private const byte PACKETCODE_HANDSHAKE = 0;
+        private const byte PACKETCODE_DISCONNECT = 1;
+        private const byte PACKETCODE_PING = 2;
+        private const byte PACKETCODE_PONG = 3;
+        private const byte PACKETCODE_MESSAGE = 4;
+
+        private ConnectionState m_state;
 
         private TcpClient m_tcpClient;
         private IAsyncResult m_pendingTcpConnect;
         private NetworkStream m_tcpStream;
         private BufferedStream m_bufferedTcpStream;
-
-        private byte[] m_sendBuffer;
-        private NetworkWriter m_sendBufferWriter;
+        private BinaryWriter m_bufferedTcpStreamWriter;
 
         private byte[] m_receiveBuffer;
-        private int m_receiveSize;
-        private int m_receiveProgress;
-        private NetworkReader m_receiveBufferReader;
+        private int m_receiveBufferProgress;
+        private int m_receivedPacketType;
+        private int m_receivedMessageSize;
+        private BinaryReader m_receiveBufferReader;
 
-        private int m_lastPingTime;
+        private int m_lastPingTimeInMillis;
         private ushort m_lastPingID;
-        private int m_ping;
+        private int m_pingInMillis;
 
         private Exception m_pendingError;
 
@@ -41,46 +47,49 @@ namespace Dan200.Core.Multiplayer
             }
         }
 
-        public TimeSpan PingTime
+        public float PingTime
         {
             get
             {
-                return new TimeSpan(m_ping * TimeSpan.TicksPerMillisecond);
+                return m_pingInMillis / 1000.0f;
             }
         }
 
-        public ConnectionStatus Status
+        public ConnectionState State
         {
             get
             {
-                return m_status;
+                return m_state;
             }
+        }
+
+        private void RegisterMethod<T1, T2, T3, T4>(Action<T1, T2, T3, T4> method)
+        {
+
         }
 
         public RemoteConnection(string hostname, int tcpPort)
         {
             // Construct buffers
-            m_sendBuffer = new byte[MAX_PACKET_SIZE];
-            m_sendBufferWriter = new NetworkWriter(new MemoryStream(m_sendBuffer, true));
-
-            m_receiveBuffer = new byte[MAX_PACKET_SIZE];
-            m_receiveProgress = -1;
-            m_receiveSize = -1;
-            m_receiveBufferReader = new NetworkReader(new MemoryStream(m_receiveBuffer, false));
+            m_receiveBuffer = new byte[MAX_MESSAGE_SIZE];
+            m_receiveBufferProgress = 0;
+            m_receivedPacketType = -1;
+            m_receivedMessageSize = -1;
+            m_receiveBufferReader = new BinaryReader(new MemoryStream(m_receiveBuffer, false));
 
             // Start connecting
-            m_status = ConnectionStatus.Connecting;
+            m_state = ConnectionState.Connecting;
 
             m_tcpClient = new TcpClient();
             m_tcpClient.NoDelay = true;
-            m_tcpClient.ReceiveTimeout = 10000;
-            m_tcpClient.SendTimeout = 10000;
-
+            m_tcpClient.ReceiveTimeout = TIMEOUT;
+            m_tcpClient.SendTimeout = TIMEOUT;
             try
             {
                 m_pendingTcpConnect = m_tcpClient.BeginConnect(hostname, tcpPort, null, null);
                 m_tcpStream = null;
                 m_bufferedTcpStream = null;
+                m_bufferedTcpStreamWriter = null;
             }
             catch (IOException e)
             {
@@ -91,16 +100,14 @@ namespace Dan200.Core.Multiplayer
         internal RemoteConnection(TcpClient tcpClient)
         {
             // Construct buffers
-            m_sendBuffer = new byte[MAX_PACKET_SIZE + 2];
-            m_sendBufferWriter = new NetworkWriter(new MemoryStream(m_sendBuffer, true));
-
-            m_receiveBuffer = new byte[MAX_PACKET_SIZE];
-            m_receiveProgress = -1;
-            m_receiveSize = -1;
-            m_receiveBufferReader = new NetworkReader(new MemoryStream(m_receiveBuffer, false));
+            m_receiveBuffer = new byte[MAX_MESSAGE_SIZE];
+            m_receiveBufferProgress = 0;
+            m_receivedPacketType = -1;
+            m_receivedMessageSize = -1;
+            m_receiveBufferReader = new BinaryReader(new MemoryStream(m_receiveBuffer, false));
 
             // Assume already connected
-            m_status = ConnectionStatus.Connecting;
+            m_state = ConnectionState.Connecting;
             m_tcpClient = tcpClient;
 
             try
@@ -108,11 +115,12 @@ namespace Dan200.Core.Multiplayer
                 // Open the stream
                 m_tcpStream = tcpClient.GetStream();
                 m_bufferedTcpStream = new BufferedStream(m_tcpStream);
+                m_bufferedTcpStreamWriter = new BinaryWriter(m_bufferedTcpStream);
 
                 // Send the handshake and the first ping
                 SendHandshake();
                 SendPing();
-                m_bufferedTcpStream.Flush();
+                m_bufferedTcpStreamWriter.Flush();
             }
             catch (IOException e)
             {
@@ -122,34 +130,24 @@ namespace Dan200.Core.Multiplayer
 
         public virtual void Dispose()
         {
-            if (m_status != ConnectionStatus.Disconnected)
+            if (m_state != ConnectionState.Disconnected)
             {
                 Disconnect();
             }
         }
 
-        public void Send(IMessage message)
+        public void SendMessage(ByteString message)
         {
             // Check state
             CheckConnected();
-
-            // Leave space for the size
-            m_sendBufferWriter.Position = 0;
-            m_sendBufferWriter.Write((ushort)0);
-
-            // Encode the message
-            MessageFactory.Encode(message, m_sendBufferWriter);
-            int size = (int)m_sendBufferWriter.Position - 2;
-
-            // Go back and fill the size in
-            m_sendBufferWriter.Position = 0;
-            m_sendBufferWriter.Write((ushort)(size + 3));
+            App.Assert(message.Length <= MAX_MESSAGE_SIZE);
 
             // Transmit the packet
             try
             {
-                // Include the size
-                m_bufferedTcpStream.Write(m_sendBuffer, 0, 2 + size);
+                m_bufferedTcpStreamWriter.Write(PACKETCODE_MESSAGE);
+                m_bufferedTcpStreamWriter.Write((ushort)message.Length);
+                m_bufferedTcpStreamWriter.Write(message);
             }
             catch (IOException e)
             {
@@ -157,27 +155,22 @@ namespace Dan200.Core.Multiplayer
             }
         }
 
-        public void SendPing()
+        private void SendPing()
         {
-            // Build the packet
-            m_sendBufferWriter.Position = 0;
-            m_sendBufferWriter.Write((ushort)1);
-            m_sendBufferWriter.Write(++m_lastPingID);
+            // Record the ping time
+            m_lastPingTimeInMillis = Environment.TickCount;
 
-            // Send the packet
-            m_lastPingTime = Environment.TickCount;
-            m_bufferedTcpStream.Write(m_sendBuffer, 0, 4);
+            // Transmit the packet
+            ushort pingID = ++m_lastPingID;
+            m_bufferedTcpStreamWriter.Write(PACKETCODE_PING);
+            m_bufferedTcpStreamWriter.Write(pingID);
         }
 
-        private void SendPong(ushort id)
+        private void SendPong(ushort pingID)
         {
-            // Build the packet
-            m_sendBufferWriter.Position = 0;
-            m_sendBufferWriter.Write((ushort)2);
-            m_sendBufferWriter.Write(id);
-
             // Send the packet
-            m_bufferedTcpStream.Write(m_sendBuffer, 0, 4);
+            m_bufferedTcpStreamWriter.Write(PACKETCODE_PONG);
+            m_bufferedTcpStreamWriter.Write(pingID);
         }
 
         public bool Receive(out Packet o_packet)
@@ -201,14 +194,15 @@ namespace Dan200.Core.Multiplayer
                         m_tcpClient.EndConnect(m_pendingTcpConnect);
                         m_pendingTcpConnect = null;
 
-                        // Open the streak
+                        // Open the stream
                         m_tcpStream = m_tcpClient.GetStream();
                         m_bufferedTcpStream = new BufferedStream(m_tcpStream);
+                        m_bufferedTcpStreamWriter = new BinaryWriter(m_bufferedTcpStream);
 
                         // Send the handshake and the first ping
                         SendHandshake();
                         SendPing();
-                        m_bufferedTcpStream.Flush();
+                        m_bufferedTcpStreamWriter.Flush();
                     }
                     else
                     {
@@ -218,154 +212,156 @@ namespace Dan200.Core.Multiplayer
                     }
                 }
 
-                // Check TCP packets
-                if (m_tcpStream.DataAvailable)
+                // See if it's time to send a ping
+                if ((Environment.TickCount - m_lastPingTimeInMillis) > PING_INTERVAL)
                 {
-                    if (m_status == ConnectionStatus.Connecting)
+                    SendPing();
+                }
+
+                // Wait for a packet
+                if(m_receivedPacketType < 0)
+                {
+                    if(WaitForBytes(1))
                     {
-                        // Verify the handshake
-                        int result = VerifyHandshake();
-                        if (result < 0)
-                        {
-                            // Disconnect
-                            Disconnect();
-                            o_packet = Packet.Disconnect;
-                            return true;
-                        }
-                        else
-                        {
-                            // Return a connection packet
-                            m_status = ConnectionStatus.Connected;
-                            o_packet = Packet.Connect;
-                            return true;
-                        }
+                        m_receivedPacketType = m_receiveBuffer[0];
                     }
+                }
 
-                    if (m_receiveProgress < 0)
+                // Parse the packet contents
+                if (m_receivedPacketType >= 0)
+                {
+                    if (m_state == ConnectionState.Connecting)
                     {
-                        // Start a new packet:
-                        // Get the size
-                        int header = ReadShort();
-                        if (header <= 0)
+                        // Connecting: Wait for handshake
+                        switch (m_receivedPacketType)
                         {
-                            // Disconnect
-                            Disconnect();
-                            o_packet = Packet.Disconnect;
-                            return true;
-                        }
-                        else if (header == 1)
-                        {
-                            // Ping
-                            int id = ReadShort();
-                            if (id < 0)
-                            {
-                                // Disconnect
-                                Disconnect();
-                                o_packet = Packet.Disconnect;
-                                return true;
-                            }
-                            else
-                            {
-                                // Reply to the ping
-                                SendPong((ushort)id);
-                                o_packet = Packet.Ping;
-                                return true;
-                            }
-                        }
-                        else if (header == 2)
-                        {
-                            // Pong
-                            int id = ReadShort();
-                            if (id < 0)
-                            {
-                                // Disconnect
-                                Disconnect();
-                                o_packet = Packet.Disconnect;
-                                return true;
-                            }
-                            else
-                            {
-                                // Measure the ping
-                                if (id == m_lastPingID)
+                            case PACKETCODE_HANDSHAKE:
                                 {
-                                    var now = Environment.TickCount;
-                                    m_ping = (now - m_lastPingTime);
+                                    // Handshake
+                                    if (WaitForBytes(4))
+                                    {
+                                        // Verify the handshake is correct
+                                        int handshake = m_receiveBufferReader.ReadInt32();
+                                        if (VerifyHandshake(handshake))
+                                        {
+                                            // Correct handshake: connect
+                                            m_state = ConnectionState.Connected;
+                                            o_packet = Packet.Connect;
+                                            EndPacket();
+                                            return true;
+                                        }
+                                        else
+                                        {
+                                            // Failed handshake: disconnect
+                                            Disconnect();
+                                            o_packet = Packet.Error("Handshake failed");
+                                            EndPacket();
+                                            return true;
+                                        }
+                                    }
+                                    break;
                                 }
-                                o_packet = Packet.Pong;
-                                return true;
-                            }
-                        }
-
-                        // Read some bytes
-                        int size = header - 3;
-                        if (size > MAX_PACKET_SIZE)
-                        {
-                            throw new IOException("Message too large");
-                        }
-
-                        var bytesRead = m_tcpStream.Read(m_receiveBuffer, 0, size);
-                        if (bytesRead == 0)
-                        {
-                            Disconnect();
-                            o_packet = Packet.Disconnect;
-                            return true;
-                        }
-
-                        // See if we got the whole packet or not
-                        if (bytesRead == size)
-                        {
-                            // If so, decode it immediately
-                            m_receiveBufferReader.Position = 0;
-                            var message = MessageFactory.Decode(m_receiveBufferReader);
-                            o_packet = new Packet(message);
-                            return true;
-                        }
-                        else
-                        {
-                            // Otherwise, record the progress so we can resume next frame
-                            m_receiveSize = size;
-                            m_receiveProgress = bytesRead;
+                            default:
+                                {
+                                    // Invalid packet: disconnect
+                                    Disconnect();
+                                    o_packet = Packet.Error("Invalid packet type");
+                                    EndPacket();
+                                    return true;
+                                }
                         }
                     }
                     else
                     {
-                        // Continue an existing packet:
-                        // Read some bytes
-                        var bytesRead = m_tcpStream.Read(m_receiveBuffer, m_receiveProgress, m_receiveSize - m_receiveProgress);
-                        if (bytesRead == 0)
+                        // Disconnecting: Wait for anything
+                        switch(m_receivedPacketType)
                         {
-                            Disconnect();
-                            o_packet = Packet.Disconnect;
-                            return true;
-                        }
-
-                        // See if we completed the packet
-                        if (bytesRead + m_receiveProgress == m_receiveSize)
-                        {
-                            // If so, decode it immediately
-                            m_receiveBufferReader.Position = 0;
-                            var message = MessageFactory.Decode(m_receiveBufferReader);
-                            o_packet = new Packet(message);
-
-                            // Reset the receive progress
-                            m_receiveProgress = -1;
-                            m_receiveSize = -1;
-                            return true;
-                        }
-                        else
-                        {
-                            // Otherwise, record the progress so we can resume next frame
-                            m_receiveProgress += bytesRead;
+                            case PACKETCODE_PING:
+                                {
+                                    // Ping
+                                    if (WaitForBytes(2))
+                                    {
+                                        // Reply to the ping
+                                        ushort pingID = m_receiveBufferReader.ReadUInt16();
+                                        SendPong(pingID);
+                                        o_packet = Packet.Ping;
+                                        EndPacket();
+                                        return true;
+                                    }
+                                    break;
+                                }
+                            case PACKETCODE_PONG:
+                                {
+                                    // Pong
+                                    if (WaitForBytes(2))
+                                    {
+                                        // Measure the ping
+                                        ushort pingID = m_receiveBufferReader.ReadUInt16();
+                                        if (pingID == m_lastPingID)
+                                        {
+                                            var now = Environment.TickCount;
+                                            m_pingInMillis = (now - m_lastPingTimeInMillis);
+                                        }
+                                        o_packet = Packet.Pong;
+                                        EndPacket();
+                                        return true;
+                                    }
+                                    break;
+                                }
+                            case PACKETCODE_MESSAGE:
+                                {
+                                    // Message
+                                    if(m_receivedMessageSize < 0)
+                                    {
+                                        if(WaitForBytes(2))
+                                        {
+                                            // Store the message size
+                                            ushort messageSize = m_receiveBufferReader.ReadUInt16();
+                                            if(messageSize > MAX_MESSAGE_SIZE)
+                                            {
+                                                Disconnect();
+                                                o_packet = Packet.Error("Message too large");
+                                                EndPacket();
+                                                return true;
+                                            }
+                                            else
+                                            {
+                                                m_receivedMessageSize = messageSize;
+                                            }
+                                        }
+                                    }
+                                    if(m_receivedMessageSize >= 0)
+                                    {
+                                        int messageSize = m_receivedMessageSize;
+                                        if(WaitForBytes(messageSize))
+                                        {
+                                            o_packet = new Packet(new ByteString(m_receiveBuffer, 0, messageSize));
+                                            EndPacket();
+                                            return true;
+                                        }
+                                    }
+                                    break;
+                                }
+                            case PACKETCODE_DISCONNECT:
+                                {
+                                    Disconnect();
+                                    o_packet = Packet.Disconnect;
+                                    EndPacket();
+                                    break;
+                                }
+                            default:
+                                {
+                                    // Invalid packet: disconnect
+                                    Disconnect();
+                                    o_packet = Packet.Error("Invalid packet type");
+                                    EndPacket();
+                                    return true;
+                                }
                         }
                     }
                 }
 
                 // No packets received
-                // See if it's time to send a ping
-                if ((Environment.TickCount - m_lastPingTime) > PING_INTERVAL)
-                {
-                    SendPing();
-                }
                 o_packet = default(Packet);
                 return false;
             }
@@ -374,6 +370,7 @@ namespace Dan200.Core.Multiplayer
                 // Return a socket error
                 Disconnect();
                 o_packet = Packet.Error(e.SocketErrorCode.ToString());
+                EndPacket();
                 return true;
             }
             catch (IOException e)
@@ -389,22 +386,21 @@ namespace Dan200.Core.Multiplayer
                 {
                     o_packet = Packet.Error(e.Message);
                 }
+                EndPacket();
                 return true;
             }
         }
 
         public void Flush()
         {
-            if (m_status == ConnectionStatus.Connected)
+            CheckConnected();
+            try
             {
-                try
-                {
-                    m_bufferedTcpStream.Flush();
-                }
-                catch (IOException e)
-                {
-                    m_pendingError = e;
-                }
+                m_bufferedTcpStreamWriter.Flush();
+            }
+            catch (IOException e)
+            {
+                m_pendingError = e;
             }
         }
 
@@ -415,10 +411,8 @@ namespace Dan200.Core.Multiplayer
             {
                 if (m_tcpStream != null)
                 {
-                    // Send zero to signal disconnection
-                    m_sendBufferWriter.Position = 0;
-                    m_sendBufferWriter.Write((ushort)0);
-                    m_tcpStream.Write(m_sendBuffer, 0, 2);
+                    // Send a packet to signal disconnection
+                    m_bufferedTcpStreamWriter.Write(PACKETCODE_DISCONNECT);
 
                     // Close the stream
                     m_tcpStream.Close();
@@ -431,67 +425,63 @@ namespace Dan200.Core.Multiplayer
             }
             m_tcpClient = null;
             m_tcpStream = null;
+            m_bufferedTcpStream = null;
+            m_bufferedTcpStreamWriter = null;
             m_pendingTcpConnect = null;
-            m_status = ConnectionStatus.Disconnected;
+            m_state = ConnectionState.Disconnected;
         }
 
         private void CheckConnected()
         {
-            App.Assert(Status == ConnectionStatus.Connected);
+            App.Assert(State == ConnectionState.Connected);
         }
 
         private void CheckNotDisconnected()
         {
-            App.Assert(Status == ConnectionStatus.Disconnected);
+            App.Assert(State != ConnectionState.Disconnected);
         }
 
         private int BuildHandshake()
         {
-            m_sendBufferWriter.Position = 0;
-			m_sendBufferWriter.Write((App.Info.Title + App.Info.Version).StableHash());
-            return 4;
+            return (App.Info.Title + App.Info.Version).StableHash();
         }
 
         private void SendHandshake()
         {
-            int size = BuildHandshake();
-            m_bufferedTcpStream.Write(m_sendBuffer, 0, size);
+            int handshake = BuildHandshake();
+            m_bufferedTcpStreamWriter.Write(PACKETCODE_HANDSHAKE);
+            m_bufferedTcpStreamWriter.Write(handshake);
         }
 
-        private int VerifyHandshake()
+        private bool VerifyHandshake(int receivedHandshake)
         {
-            int size = BuildHandshake();
-            for (int i = 0; i < size; ++i)
-            {
-                var b = m_tcpStream.ReadByte();
-                if (b < 0)
-                {
-                    return -1;
-                }
-
-                if (b != m_sendBuffer[i])
-                {
-                    throw new IOException("Handshake failed");
-                }
-            }
-            return 0;
+            int handshake = BuildHandshake();
+            return receivedHandshake == handshake;
         }
 
-        private int ReadShort()
+        private bool WaitForBytes(int size)
         {
-            var b1 = m_tcpStream.ReadByte();
-            if (b1 < 0)
+            int bytesRemaining = size - m_receiveBufferProgress;
+            App.Assert(bytesRemaining > 0);
+            if (m_tcpStream.DataAvailable)
             {
-                return -1;
+                int bytesRead = m_tcpStream.Read(m_receiveBuffer, m_receiveBufferProgress, bytesRemaining);
+                m_receiveBufferProgress += bytesRead;
+                bytesRemaining -= bytesRead;
+                if (bytesRemaining <= 0)
+                {
+                    m_receiveBufferReader.BaseStream.Position = 0;
+                    m_receiveBufferProgress = 0;
+                    return true;
+                }
             }
+            return false;
+        }
 
-            var b2 = m_tcpStream.ReadByte();
-            if (b2 < 0)
-            {
-                return -1;
-            }
-
-            return (b1 | (b2 << 8));
+        private void EndPacket()
+        {
+            m_receivedPacketType = -1;
+            m_receivedMessageSize = -1;
         }
     }
 }

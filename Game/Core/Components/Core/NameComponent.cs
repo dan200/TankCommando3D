@@ -1,6 +1,7 @@
 using System;
 using Dan200.Core.Animation;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Level;
 using Dan200.Core.Lua;
 using Dan200.Core.Math;
@@ -46,7 +47,7 @@ namespace Dan200.Core.Components.Core
             m_system.AddEntity(Entity, properties.Name);
         }
 
-        protected override void ReInit(in NameComponentData properties)
+        protected override void Reset(in NameComponentData properties)
         {
             m_system.RemoveEntity(Entity);
             m_system.AddEntity(Entity, properties.Name);
@@ -60,14 +61,6 @@ namespace Dan200.Core.Components.Core
 		public void OnParentChanged(Entity oldParent, Entity newParent)
 		{
             m_system.MoveEntity(Entity, oldParent, newParent);
-		}
-
-		public void OnChildAdded(Entity child)
-		{
-		}
-
-		public void OnChildRemoved(Entity child)
-		{
 		}
 
         [LuaMethod]

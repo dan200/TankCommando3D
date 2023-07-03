@@ -39,13 +39,15 @@ using Dan200.Game.Components.Player;
 using Dan200.Game.User;
 using Dan200.Core.Render.OpenGL;
 using Dan200.Game.Systems;
+using System.Reflection;
+using Dan200.Core.Platform;
 
 namespace Dan200.Game.Game
 {
     internal class Game : IGame
     {
         public const float TARGET_RESOLUTION_Y = 360.0f;
-        public const float TARGET_SCREEN_HEIGHT = 1080.0f;
+        public const float TARGET_SCREEN_HEIGHT = 360.0f;
 
         private User.User m_user;
         private IWindow m_window;
@@ -60,7 +62,7 @@ namespace Dan200.Game.Game
         private DebugCameraController m_debugCameraController;
         private GUI.Console m_console;
 
-        private SkyInstance m_sky;
+        private Sky m_sky;
         private Screen m_screen;
 
         private IRenderer m_renderer;
@@ -105,7 +107,7 @@ namespace Dan200.Game.Game
             }
         }
 
-        public SkyInstance Sky
+        public Sky Sky
         {
             get
             {
@@ -307,8 +309,7 @@ namespace Dan200.Game.Game
             Assets.RegisterType<PhysicsMaterial>("physicsMaterial");
             Assets.RegisterType<TextAsset>("txt");
 
-            bool headless = App.Arguments.GetBool("headless");
-            if (!headless)
+            if (!App.Platform.Headless)
             {
                 Assets.RegisterType<OpenGLFragmentShader>("frag");
                 Assets.RegisterType<OpenGLVertexShader>("vert");
@@ -316,7 +317,7 @@ namespace Dan200.Game.Game
                 Assets.RegisterType<OpenGLTexture>("png");
             }
 
-            if (headless || App.Arguments.GetBool("nosound"))
+            if (App.Platform.Headless || App.Arguments.GetBool("nosound"))
             {
                 Assets.RegisterType<NullMusic>("ogg");
                 Assets.RegisterType<NullSound>("wav");
@@ -370,15 +371,13 @@ namespace Dan200.Game.Game
 
         public GameInfo GetInfo()
         {
+            var assembly = typeof(Game).Assembly;
+            var version = assembly.GetName().Version;
             var info = new GameInfo();
-            info.Title = "Tank Commando 3D";
-            info.Website = "http://www.dan200.net";
-            info.DeveloperName = "Daniel Ratcliffe";
-            var version = typeof(Game).Assembly.GetName().Version;
+            info.Title = assembly.GetCustomAttribute<AssemblyTitleAttribute>().Title;
+            info.Author = assembly.GetCustomAttribute<AssemblyCompanyAttribute>().Company;
             info.Version = new Version(version.Major, version.Minor, version.Build);
             info.SteamAppID = 0;
-            info.Achievements = Achievements.ALL_ACHIEVEMENTS;
-            info.Statistics = Statistics.ALL_STATISTICS;
             return info;
         }
 
@@ -717,6 +716,7 @@ namespace Dan200.Game.Game
 
         public void Update(float dt)
         {
+            App.Assert(dt >= 0.0f);
             dt = Mathf.Min(dt, 0.1f);
 
             // Bind renderer
@@ -740,15 +740,9 @@ namespace Dan200.Game.Game
 
             // Toggle fullscreen
             var keyboard = InputDevices.Keyboard;
-            if ((
-                (keyboard.GetInput(Key.LeftAlt).Held || keyboard.GetInput(Key.RightAlt).Held) &&
-                 keyboard.GetInput(Key.Return).Pressed
-                ) ||
-                (
-                    App.PlatformID == Core.Platform.PlatformID.MacOS &&
-                    (keyboard.GetInput(Key.LeftGUI).Held || keyboard.GetInput(Key.RightGUI).Held) &&
-                     keyboard.GetInput(Key.W).Pressed
-                ))
+            var altEnter = (keyboard.GetInput(Key.LeftAlt).Held || keyboard.GetInput(Key.RightAlt).Held) && keyboard.GetInput(Key.Return).Pressed;
+            var cmdW = (keyboard.GetInput(Key.LeftGUI).Held || keyboard.GetInput(Key.RightGUI).Held) && keyboard.GetInput(Key.W).Pressed;
+            if (altEnter || (App.Platform.Type == PlatformType.MacOS && cmdW))
             {
                 Window.Fullscreen = !Window.Fullscreen;
                 User.Settings.Fullscreen = Window.Fullscreen;
@@ -804,31 +798,11 @@ namespace Dan200.Game.Game
 
             if (m_sky != null)
             {
-                // Draw the sky
-                var backgroundImage = m_sky.Sky.BackgroundImage;
-                if (backgroundImage != null)
+                // Draw background colour
+                var bgColour = m_sky.BackgroundColour;
+                if (bgColour != ColourF.Black)
                 {
-                    // Draw background image
-                    m_renderer.DepthWrite = false;
-                    try
-                    {
-                        m_blitEffect.Texture = Texture.Get(backgroundImage, true);
-                        m_renderer.CurrentEffect = m_blitEffect.Instance;
-                        m_renderer.Draw(m_fullScreenQuad);
-                    }
-                    finally
-                    {
-                        m_renderer.DepthWrite = true;
-                    }
-                }
-                else
-                {
-                    // Draw background colour
-                    var bgColour = m_sky.BackgroundColour;
-                    if (bgColour != ColourF.Black)
-                    {
-                        m_renderer.Clear(bgColour.ToLinear());
-                    }
+                    m_renderer.Clear(bgColour.ToLinear());
                 }
             }
 

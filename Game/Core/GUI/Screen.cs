@@ -9,7 +9,7 @@ using System;
 
 namespace Dan200.Core.GUI
 {
-    internal class Screen : IDisposable
+    internal class Screen : IDisposable, IScreen
     {
         private DeviceCollection m_inputDevices;
         private IAudio m_audio;
@@ -218,14 +218,6 @@ namespace Dan200.Core.GUI
             return new Vector2(
                 ((float)pos.X / (float)m_window.Width) * Width,
                 ((float)pos.Y / (float)m_window.Height) * Height
-            );
-        }
-
-        public Vector2 WindowToScreen(Vector2 pos)
-        {
-            return new Vector2(
-                (pos.X / (float)m_window.Width) * Width,
-                (pos.Y / (float)m_window.Height) * Height
             );
         }
     }

@@ -1,4 +1,5 @@
-﻿using Dan200.Core.Math;
+﻿using Dan200.Core.Main;
+using Dan200.Core.Math;
 
 
 namespace Dan200.Core.Input
@@ -10,11 +11,11 @@ namespace Dan200.Core.Input
         private bool m_pendingHeld;
         private bool m_pendingCancel;
 
-        private Vector2 m_startPos;
-        private Vector2 m_latestPos;
-        private Vector2 m_pendingPos;
+        private Vector2I m_startPos;
+        private Vector2I m_latestPos;
+        private Vector2I m_pendingPos;
         private Vector2 m_velocity;
-        private Vector2 m_delta;
+        private Vector2I m_delta;
         private float m_duration;
         private bool m_claimed;
 
@@ -33,17 +34,17 @@ namespace Dan200.Core.Input
             get { return !m_held && m_wasHeld; }
         }
 
-        public Vector2 StartPosition
+        public Vector2I StartPosition
         {
             get { return m_startPos; }
         }
 
-        public Vector2 LatestPosition
+        public Vector2I LatestPosition
         {
             get { return m_latestPos; }
         }
 
-        public Vector2 DeltaPosition
+        public Vector2I DeltaPosition
         {
             get { return m_delta; }
         }
@@ -69,7 +70,7 @@ namespace Dan200.Core.Input
             }
         }
 
-        public Touch(Vector2 startPos)
+        public Touch(Vector2I startPos)
         {
             m_wasHeld = false;
             m_held = false;
@@ -78,6 +79,7 @@ namespace Dan200.Core.Input
             m_startPos = startPos;
             m_latestPos = startPos;
             m_pendingPos = startPos;
+            m_delta = Vector2I.Zero;
             m_velocity = Vector2.Zero;
 
             m_duration = 0.0f;
@@ -86,6 +88,7 @@ namespace Dan200.Core.Input
 
         public void Claim()
         {
+            App.Assert(!Claimed);
             m_claimed = true;
         }
 
@@ -94,7 +97,7 @@ namespace Dan200.Core.Input
             m_pendingHeld = true;
         }
 
-        public void Move(Vector2 pos)
+        public void Move(Vector2I pos)
         {
             m_pendingPos = pos;
         }
@@ -126,7 +129,11 @@ namespace Dan200.Core.Input
             m_delta = m_pendingPos - m_latestPos;
             if (dt > 0.0f)
             {
-                m_velocity = 0.5f * m_velocity + 0.5f * (m_delta / dt);
+                m_velocity = 0.5f * m_velocity + 0.5f * (m_delta.ToVector2() / dt);
+            }
+            else
+            {
+                m_velocity = Vector2.Zero;
             }
             m_latestPos = m_pendingPos;
         }

@@ -17,11 +17,12 @@
 			Model = "models/grenade.obj",
 			CollisionGroup = "Prop",
 		},
+		Weapon = {},
 		Grenade = {
 			Timer = 4,
 		},
+		Health = {
+			MaxHealth = 0.1,
+		},
 	},
-	Children = {
-
-	}
 }

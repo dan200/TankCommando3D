@@ -29,6 +29,7 @@ namespace Dan200.Game.GUI
     {
         private const float BLINK_TIME = 0.4f;
         private const float OPEN_SPEED = 4.0f;
+        private const int FONT_SIZE = 8;
 
 		private Game.Game m_game;
         private StringBuilder m_pendingCommand;
@@ -162,7 +163,7 @@ namespace Dan200.Game.GUI
             Bind(Key.F4, "dev.setDebugCamera( not dev.getDebugCamera() )");
             Bind(Key.F5, "dev.reloadAssets()");
             Bind(Key.F12, "game.quit()");
-            Bind(Key.P, "dev.toggleDebugDraw(\"Physics\")");
+            Bind(Key.P, "dev.toggleDebugDraw(\"PhysicsWorld\")");
 			Bind(Key.Equals, "level.setTimeScale(math.min(level.getTimeScale() * 2.0, 32.0))");
 			Bind(Key.Minus, "level.setTimeScale(math.max(level.getTimeScale() * 0.5, 0.0625))");
         }
@@ -342,7 +343,7 @@ namespace Dan200.Game.GUI
 		{
 			var origin = Position;
 			var font = UIFonts.Default;
-			var fontSize = 20;
+            var fontSize = FONT_SIZE;
             var textHeight = font.GetHeight(fontSize);
 
 			// Draw the background

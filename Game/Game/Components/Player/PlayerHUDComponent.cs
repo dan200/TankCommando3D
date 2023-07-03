@@ -8,6 +8,7 @@ using Dan200.Core.Render;
 using Dan200.Core.Systems;
 using Dan200.Game.GUI;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,7 +37,7 @@ namespace Dan200.Game.Components.Player
     [AfterComponent(typeof(TankMoverComponent))]
     internal class PlayerHUDComponent : Component<PlayerHUDComponentData>, IUpdate
     {
-        private const float MARGIN = 18.0f;
+        private const float MARGIN = 6.0f;
 
         private ChatterSystem m_chatterSystem;
         private PlayerMovementComponent m_playerMovement;
@@ -128,11 +129,11 @@ namespace Dan200.Game.Components.Player
             m_gameOver.TanksKilled = m_playerStats.GetStat(PlayerStatistic.TanksKilled);
 
             var weapon = m_playerWeapons.Weapon;
-            var weaponGun = (weapon != null) ? weapon.GetComponent<GunComponent>() : null;
-            if(weaponGun != null)
+            var ammo = (weapon != null) ? weapon.Entity.GetComponent<AmmoComponent>() : null;
+            if(ammo != null)
             {
                 m_ammo.Visible = true;
-                m_ammo.Ammo = weaponGun.AmmoInClip;
+                m_ammo.Ammo = ammo.AmmoInClip;
             }
             else
             {

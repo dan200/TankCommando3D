@@ -8,21 +8,15 @@ namespace Dan200.Core.Main
     {
         public string Title;
         public Version Version;
-        public string Website;
-        public string DeveloperName;
+        public string Author;
         public uint SteamAppID;
-		public Achievement[] Achievements;
-		public Statistic[] Statistics;
 
         public GameInfo()
         {
             Title = "Untitled";
             Version = new Version(0, 0, 0);
-            Website = "";
-            DeveloperName = "";
+            Author = "";
             SteamAppID = 0;
-			Achievements = EmptyArray<Achievement>.Instance;
-			Statistics = EmptyArray<Statistic>.Instance;
         }
     }
 }

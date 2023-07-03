@@ -6,7 +6,7 @@ using Dan200.Core.Util;
 
 namespace Dan200.Core.GUI
 {
-	internal class CheckBox : Element, IAreaHolder
+	internal class CheckBox : Element, IAreaProvider
     {
 		private Font m_font;
         private int m_fontSize;
@@ -169,14 +169,14 @@ namespace Dan200.Core.GUI
 				if (Screen.CheckTouchPressed(GetSubArea(0), out touch))
 				{
 					touch.Claim();
-					return new TouchPress(Screen, touch, this, 0);
+					return new TouchPress(Screen, touch, this);
 				}
 
                 // Check mouse
                 IMouse mouse;
 				if (Screen.CheckMousePressed(GetSubArea(0), MouseButton.Left, out mouse))
 				{
-					return new MousePress(Screen, mouse, MouseButton.Left, this, 0);
+					return new MousePress(Screen, mouse, MouseButton.Left, this);
 				}
 			}
 			return null;

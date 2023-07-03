@@ -11,9 +11,9 @@ using System.Collections;
 using Dan200.Core.Multiplayer;
 using Dan200.Core.Lua;
 using Dan200.Core.Async;
-using Dan200.Core.Level.Messages;
 using System.Reflection;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Systems;
 using Dan200.Core.Audio;
 using System.Text;
@@ -112,7 +112,7 @@ namespace Dan200.Core.Level
 			App.Assert(m_systems.Mask.IsEmpty);
         }
 
-        public void MakeNewComponentsLive()
+        public void PromoteNewComponents()
         {
             m_components.RemoveDeadComponents();
             m_components.PromoteNewComponents();
@@ -278,6 +278,7 @@ namespace Dan200.Core.Level
 			var saveData = new LevelSaveData();
 			saveData.LevelPath = Data.Path;
 
+            /*
             // Save systems
             var savedProperties = new LuaTable();
             foreach (var system in m_systems.GetSystemsWithInterface<ISave>())
@@ -296,12 +297,6 @@ namespace Dan200.Core.Level
             // Save entities
             foreach(var entity in m_entities)
             {
-                if (!entity.Persist)
-                {
-                    continue;
-                }
-
-				/*
 				// TODO
                 App.Assert(entity.Data != null, "Cannot persist entity without an EntityData");
                 App.Assert(entity.Properties != null, "Cannot persist entity without Properties");
@@ -344,10 +339,10 @@ namespace Dan200.Core.Level
 					}
                 }
 				saveData.Entities.Add(entitySaveData);
-				*/
             }
+            */
 
-			return saveData;
+            return saveData;
         }
     }
 }

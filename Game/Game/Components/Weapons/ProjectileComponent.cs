@@ -1,6 +1,8 @@
 ﻿using Dan200.Core.Components.Core;
 using Dan200.Core.Geometry;
 using Dan200.Core.Interfaces;
+using Dan200.Core.Interfaces.Physics;
+using Dan200.Core.Interfaces.Core;
 using Dan200.Core.Level;
 using Dan200.Core.Lua;
 using Dan200.Core.Main;
@@ -10,11 +12,13 @@ using Dan200.Core.Render;
 using Dan200.Core.Serialisation;
 using Dan200.Core.Systems;
 using Dan200.Core.Util;
+using Dan200.Game.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Dan200.Core.Components.Physics;
 
 namespace Dan200.Game.Components.Weapons
 {
@@ -36,11 +40,11 @@ namespace Dan200.Game.Components.Weapons
         public float LifeSpan;
     }
 
-    [RequireSystem(typeof(PhysicsSystem))]
+    [RequireComponentOnAncestor(typeof(PhysicsWorldComponent))]
     [RequireComponent(typeof(TransformComponent))]
-    internal class ProjectileComponent : Component<ProjectileComponentData>, IPhysicsUpdate, IUpdate
+    internal class ProjectileComponent : Component<ProjectileComponentData>, IPhysicsUpdate, IUpdate, IDamagePropagator
     {
-        private PhysicsSystem m_physics;
+        private PhysicsWorldComponent m_physics;
         private TransformComponent m_transform;
 
         private Vector3 m_lastPosition;
@@ -65,7 +69,7 @@ namespace Dan200.Game.Components.Weapons
 
         protected override void OnInit(in ProjectileComponentData properties)
         {
-            m_physics = Level.GetSystem<PhysicsSystem>();
+            m_physics = Entity.GetComponentOnAncestor<PhysicsWorldComponent>();
             m_transform = Entity.GetComponent<TransformComponent>();
 
             m_position = m_transform.LocalPosition;
@@ -154,13 +158,12 @@ namespace Dan200.Game.Components.Weapons
                         GlobalRandom.Float(0.0f, 360.0f),
                         GlobalRandom.Float(0.0f, 360.0f)
                     ).ToLuaValue();
-                    var impact = m_impactPrefab.Instantiate(Level, properties);
+                    var impact = m_impactPrefab.Instantiate(Level, properties, 1); // TODO
 
-                    // Propogate damage origin
-                    var explosion = impact.GetComponent<ExplosionComponent>();
-                    if(explosion != null)
+                    // Propagate damage origin
+                    foreach (var propagator in impact.GetComponentsWithInterface<IDamagePropagator>())
                     {
-                        explosion.DamageOrigin = DamageOrigin;
+                        propagator.DamageOrigin = DamageOrigin;
                     }
 
                     m_hitEntity = null;

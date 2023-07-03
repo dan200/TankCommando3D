@@ -37,6 +37,7 @@ namespace Dan200.Core.Level
         public static object LoadData(Stream stream, string path)
         {
             var decoder = new LONDecoder(stream);
+            decoder.AddMacro("Vector2", LONMacros.Vector2);
             decoder.AddMacro("Vector3", LONMacros.Vector3);
             decoder.AddMacro("Colour", LONMacros.Colour);
             return decoder.DecodeValue().GetTable();
